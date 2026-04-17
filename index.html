@@ -43,14 +43,26 @@
             box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
             outline: none;
         }
+        /* 載入中動畫 */
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .loading-spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4 sm:p-8">
 
     <div class="relative w-full max-w-4xl bg-slate-900 rounded-3xl overflow-hidden shadow-2xl border border-slate-800">
         
-        <div class="absolute top-0 right-0 w-96 h-96 bg-blue-600/20 rounded-full blur-[100px] -mr-48 -mt-48"></div>
-        <div class="absolute bottom-0 left-0 w-96 h-96 bg-cyan-600/10 rounded-full blur-[100px] -ml-48 -mb-48"></div>
+        <div class="absolute top-0 right-0 w-96 h-96 bg-blue-600/20 rounded-full blur-[100px] -mr-48 -mt-48 pointer-events-none"></div>
+        <div class="absolute bottom-0 left-0 w-96 h-96 bg-cyan-600/10 rounded-full blur-[100px] -ml-48 -mb-48 pointer-events-none"></div>
 
         <div class="relative z-10 flex flex-col md:flex-row">
             
@@ -105,11 +117,11 @@
                     <div class="flex flex-col sm:flex-row gap-3">
                         <input type="text" id="user-name" placeholder="請輸入您的姓名" 
                                class="flex-1 custom-input text-white px-5 py-3 rounded-xl">
-                        <button id="join-btn" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-8 py-3 rounded-xl transition-all active:scale-95 disabled:opacity-50">
-                            參加
+                        <button id="join-btn" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-8 py-3 rounded-xl transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center min-w-[100px] gap-2">
+                            <span>參加</span>
                         </button>
                     </div>
-                    <p id="status-msg" class="text-xs text-slate-400 italic text-center hidden">正在儲存...</p>
+                    <p id="error-msg" class="text-xs text-red-400 text-center hidden font-medium">請輸入姓名後再點擊參加</p>
                 </div>
 
                 <!-- 已報名名單 -->
@@ -119,8 +131,7 @@
                         <span id="participant-count" class="text-blue-400 text-xs font-bold bg-blue-400/10 px-2 py-0.5 rounded-full">0 人</span>
                     </div>
                     <div id="participant-list" class="flex flex-wrap gap-2 max-h-32 overflow-y-auto pr-2 custom-scrollbar">
-                        <!-- 名單會動態生成於此 -->
-                        <p class="text-slate-600 text-xs italic">尚未有人簽到</p>
+                        <p class="text-slate-600 text-xs italic">正在載入名單...</p>
                     </div>
                 </div>
 
@@ -132,15 +143,15 @@
     </div>
 
     <!-- 成功提示框 -->
-    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 glass-morphism border-green-500/50 text-white px-6 py-3 rounded-full shadow-2xl opacity-0 translate-y-10 transition-all pointer-events-none">
-        ✅ 報名成功！期待見到您。
+    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 glass-morphism border-green-500/50 text-white px-6 py-3 rounded-full shadow-2xl opacity-0 translate-y-10 transition-all pointer-events-none z-50">
+        <span id="toast-text">✅ 報名成功！期待見到您。</span>
     </div>
 
     <!-- Firebase 整合腳本 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = JSON.parse(__firebase_config);
         const app = initializeApp(firebaseConfig);
@@ -152,38 +163,42 @@
         const joinBtn = document.getElementById('join-btn');
         const listContainer = document.getElementById('participant-list');
         const countBadge = document.getElementById('participant-count');
-        const statusMsg = document.getElementById('status-msg');
+        const errorMsg = document.getElementById('error-msg');
         const toast = document.getElementById('toast');
+        const toastText = document.getElementById('toast-text');
 
         let currentUser = null;
+        let existingNames = [];
 
-        // 初始化認證 (Rule 3)
+        // 初始化認證
         const initAuth = async () => {
-            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                await signInWithCustomToken(auth, __initial_auth_token);
-            } else {
-                await signInAnonymously(auth);
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (err) {
+                console.error("Auth Error:", err);
             }
         };
 
         onAuthStateChanged(auth, (user) => {
             currentUser = user;
             if (user) {
-                // 認證成功後開始監聽名單 (Rule 1: Strict Paths)
                 const participantsCol = collection(db, 'artifacts', appId, 'public', 'data', 'participants');
-                
-                // 監聽即時更新 (Rule 2: No Complex Queries)
                 onSnapshot(participantsCol, (snapshot) => {
                     const names = [];
                     snapshot.forEach(doc => {
-                        names.push(doc.data().name);
+                        if (doc.data().name) names.push(doc.data().name);
                     });
-                    
-                    // 在記憶體中排序 (Rule 2)
+                    existingNames = names;
                     names.sort();
-
                     updateUI(names);
-                }, (error) => console.error("Firestore Error:", error));
+                }, (error) => {
+                    console.error("Firestore Error:", error);
+                    listContainer.innerHTML = '<p class="text-red-400 text-xs">載入名單失敗</p>';
+                });
             } else {
                 initAuth();
             }
@@ -198,7 +213,7 @@
 
             countBadge.innerText = `${names.length} 人`;
             listContainer.innerHTML = names.map(name => `
-                <span class="bg-blue-500/10 border border-blue-500/30 text-blue-300 text-sm px-3 py-1 rounded-lg">
+                <span class="bg-blue-500/10 border border-blue-500/30 text-blue-300 text-sm px-3 py-1 rounded-lg animate-in fade-in zoom-in duration-300">
                     ${name}
                 </span>
             `).join('');
@@ -206,10 +221,29 @@
 
         async function handleJoin() {
             const name = nameInput.value.trim();
-            if (!name || !currentUser) return;
+            
+            // 基礎檢查
+            if (!name) {
+                showError("請輸入姓名後再點擊參加");
+                return;
+            }
 
+            if (!currentUser) {
+                showError("正在連線伺服器，請稍候...");
+                return;
+            }
+
+            // 檢查重複
+            if (existingNames.includes(name)) {
+                showError("此姓名已在名單中囉！");
+                return;
+            }
+
+            // 開始處理
+            errorMsg.classList.add('hidden');
             joinBtn.disabled = true;
-            statusMsg.classList.remove('hidden');
+            const originalContent = joinBtn.innerHTML;
+            joinBtn.innerHTML = '<div class="loading-spinner"></div>';
 
             try {
                 const participantsCol = collection(db, 'artifacts', appId, 'public', 'data', 'participants');
@@ -220,16 +254,24 @@
                 });
 
                 nameInput.value = '';
-                showToast();
+                showToast(`✅ ${name} 報名成功！期待見到您。`);
             } catch (e) {
-                console.error("Error adding document: ", e);
+                console.error("Save Error: ", e);
+                showError("儲存失敗，請再試一次");
             } finally {
                 joinBtn.disabled = false;
-                statusMsg.classList.add('hidden');
+                joinBtn.innerHTML = originalContent;
             }
         }
 
-        function showToast() {
+        function showError(msg) {
+            errorMsg.innerText = msg;
+            errorMsg.classList.remove('hidden');
+            setTimeout(() => errorMsg.classList.add('hidden'), 3000);
+        }
+
+        function showToast(msg) {
+            toastText.innerText = msg;
             toast.classList.remove('opacity-0', 'translate-y-10');
             toast.classList.add('opacity-100', 'translate-y-0');
             setTimeout(() => {
