@@ -32,24 +32,29 @@
             0%, 100% { height: 10px; opacity: 0.5; }
             50% { height: 50px; opacity: 1; }
         }
-        .line-button:hover {
-            background-color: #06c755;
-            transform: translateY(-2px);
+        .custom-input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        .custom-input:focus {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #38bdf8;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+            outline: none;
         }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4 sm:p-8">
 
-    <!-- Poster Container -->
     <div class="relative w-full max-w-4xl bg-slate-900 rounded-3xl overflow-hidden shadow-2xl border border-slate-800">
         
-        <!-- Background Decoration -->
         <div class="absolute top-0 right-0 w-96 h-96 bg-blue-600/20 rounded-full blur-[100px] -mr-48 -mt-48"></div>
         <div class="absolute bottom-0 left-0 w-96 h-96 bg-cyan-600/10 rounded-full blur-[100px] -ml-48 -mb-48"></div>
 
         <div class="relative z-10 flex flex-col md:flex-row">
             
-            <!-- Left Side: Visual & Slogan -->
+            <!-- 左側區域 -->
             <div class="w-full md:w-2/5 p-8 md:p-12 bg-gradient-to-br from-blue-900/40 to-slate-900 flex flex-col justify-between items-center text-center border-b md:border-b-0 md:border-r border-slate-800">
                 <div class="mt-8">
                     <div class="sound-wave justify-center mb-6">
@@ -70,98 +75,174 @@
                         「若是沒有聽見<br/>
                         <span class="text-blue-400 font-bold">怎能相信呢？</span>」
                     </p>
-                    <div class="h-1.5 w-12 bg-blue-500 mx-auto mt-6 rounded-full"></div>
                 </div>
             </div>
 
-            <!-- Right Side: Details -->
+            <!-- 右側區域 -->
             <div class="w-full md:w-3/5 p-8 md:p-12 space-y-6">
                 
-                <!-- Info Grid -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <!-- Time Section -->
                     <div class="glass-morphism rounded-2xl p-5 border-l-4 border-blue-500">
-                        <div class="flex items-center gap-3 mb-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <h3 class="text-slate-400 text-xs font-bold tracking-wider">時間 TIME</h3>
-                        </div>
+                        <h3 class="text-slate-400 text-xs font-bold tracking-wider mb-1">時間 TIME</h3>
                         <p class="text-xl font-bold text-white">4月18日</p>
                         <p class="text-blue-400 font-medium text-sm">19:00 ~ 20:30</p>
                     </div>
 
-                    <!-- Location Section -->
                     <div class="glass-morphism rounded-2xl p-5 border-l-4 border-cyan-500">
-                        <div class="flex items-center gap-3 mb-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                            <h3 class="text-slate-400 text-xs font-bold tracking-wider">地點 LOCATION</h3>
-                        </div>
+                        <h3 class="text-slate-400 text-xs font-bold tracking-wider mb-1">地點 LOCATION</h3>
                         <p class="text-xl font-bold text-white">二樓大會堂</p>
-                        <p class="text-cyan-400 font-medium text-sm">請準時入座</p>
-                    </div>
-
-                    <!-- Speaker Section -->
-                    <div class="glass-morphism rounded-2xl p-5 border-l-4 border-indigo-500 sm:col-span-2">
-                        <div class="flex items-center gap-3 mb-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
-                            <h3 class="text-slate-400 text-xs font-bold tracking-wider">講員 SPEAKER</h3>
-                        </div>
-                        <p class="text-xl font-bold text-white">資訊股</p>
+                        <p class="text-cyan-400 font-medium text-sm">現場講習</p>
                     </div>
                 </div>
 
-                <!-- Audience Section -->
-                <div class="space-y-3">
-                    <div class="flex items-center gap-2">
-                        <span class="text-slate-500 text-xs font-bold tracking-widest uppercase">參加人員 PARTICIPANTS</span>
-                        <div class="h-px flex-1 bg-slate-800"></div>
+                <!-- 快速報名區域 -->
+                <div id="registration-form" class="glass-morphism rounded-3xl p-6 border border-white/10 space-y-4">
+                    <div class="flex items-center gap-2 mb-2">
+                        <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                        <h3 class="text-white font-bold text-lg">快速簽到報名</h3>
                     </div>
                     
-                    <ul class="space-y-2 text-sm">
-                        <li class="flex items-center gap-3 text-slate-300">
-                            <span class="flex-shrink-0 w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
-                            <span>所有被安排之音控人員</span>
-                        </li>
-                        <li class="flex items-center gap-3 text-slate-300">
-                            <span class="flex-shrink-0 w-1.5 h-1.5 bg-cyan-400 rounded-full"></span>
-                            <span>有志音控工作之預培訓人員</span>
-                        </li>
-                    </ul>
-                </div>
-
-                <!-- Action Section (Updated with LINE Link) -->
-                <a href="https://line.me/R/ti/g/Rt2Y5fLcUV" target="_blank" class="block bg-gradient-to-r from-blue-600 to-cyan-600 rounded-2xl p-5 text-white shadow-lg shadow-blue-900/40 transition-all line-button">
-                    <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
-                        <div class="text-center sm:text-left">
-                            <p class="text-blue-100 text-xs opacity-90 mb-0.5">報名方式 REGISTRATION</p>
-                            <p class="text-lg font-bold leading-tight flex items-center gap-2">
-                                點擊於「音控群組」報名或請假
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M24 10.304c0-5.369-5.383-9.738-12-9.738-6.616 0-12 4.369-12 9.738 0 4.814 4.269 8.846 10.036 9.608.391.084.922.258 1.057.592.121.303.079.778.039 1.085l-.171 1.047c-.052.312-.252 1.22 1.084.665 1.336-.556 7.203-4.243 9.831-7.256 1.838-2.11 2.124-4.004 2.124-5.741zm-15.751 4.005h-1.281a.203.203 0 0 1-.202-.202V9.822a.203.203 0 0 1 .202-.202h1.281c.111 0 .202.091.202.202v4.285a.203.203 0 0 1-.202.202zm3.75 0h-1.281a.203.203 0 0 1-.202-.202V9.822a.203.203 0 0 1 .202-.202h1.281c.111 0 .202.091.202.202v4.285a.203.203 0 0 1-.202.202zm6.75 0h-1.281a.203.203 0 0 1-.202-.202V9.822a.203.203 0 0 1 .202-.202h1.281c.111 0 .202.091.202.202v4.285a.203.203 0 0 1-.202.202zm3.75 0h-1.281a.203.203 0 0 1-.202-.202V9.822a.203.203 0 0 1 .202-.202h1.281c.111 0 .202.091.202.202v4.285a.203.203 0 0 1-.202.202z"/>
-                                </svg>
-                            </p>
-                        </div>
-                        <div class="bg-white/20 px-4 py-2 rounded-xl backdrop-blur-md border border-white/20 text-sm font-bold tracking-wide">
-                            前往連結
-                        </div>
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <input type="text" id="user-name" placeholder="請輸入您的姓名" 
+                               class="flex-1 custom-input text-white px-5 py-3 rounded-xl">
+                        <button id="join-btn" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-8 py-3 rounded-xl transition-all active:scale-95 disabled:opacity-50">
+                            參加
+                        </button>
                     </div>
-                </a>
-
-                <!-- Footer Info -->
-                <div class="pt-2 border-t border-slate-800/50">
-                    <p class="text-center text-slate-600 text-[10px] uppercase tracking-[0.2em]">
-                        Audio Engineering Workshop &bull; Infotech Dept
-                    </p>
+                    <p id="status-msg" class="text-xs text-slate-400 italic text-center hidden">正在儲存...</p>
                 </div>
+
+                <!-- 已報名名單 -->
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-slate-400 text-xs font-bold tracking-widest uppercase">目前已報名名單</h3>
+                        <span id="participant-count" class="text-blue-400 text-xs font-bold bg-blue-400/10 px-2 py-0.5 rounded-full">0 人</span>
+                    </div>
+                    <div id="participant-list" class="flex flex-wrap gap-2 max-h-32 overflow-y-auto pr-2 custom-scrollbar">
+                        <!-- 名單會動態生成於此 -->
+                        <p class="text-slate-600 text-xs italic">尚未有人簽到</p>
+                    </div>
+                </div>
+
+                <p class="text-center text-slate-500 text-[10px] uppercase tracking-widest pt-4">
+                    音控講習會 &bull; 資訊股
+                </p>
             </div>
         </div>
     </div>
 
+    <!-- 成功提示框 -->
+    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 glass-morphism border-green-500/50 text-white px-6 py-3 rounded-full shadow-2xl opacity-0 translate-y-10 transition-all pointer-events-none">
+        ✅ 報名成功！期待見到您。
+    </div>
+
+    <!-- Firebase 整合腳本 -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'audio-workshop';
+
+        const nameInput = document.getElementById('user-name');
+        const joinBtn = document.getElementById('join-btn');
+        const listContainer = document.getElementById('participant-list');
+        const countBadge = document.getElementById('participant-count');
+        const statusMsg = document.getElementById('status-msg');
+        const toast = document.getElementById('toast');
+
+        let currentUser = null;
+
+        // 初始化認證 (Rule 3)
+        const initAuth = async () => {
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                await signInWithCustomToken(auth, __initial_auth_token);
+            } else {
+                await signInAnonymously(auth);
+            }
+        };
+
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            if (user) {
+                // 認證成功後開始監聽名單 (Rule 1: Strict Paths)
+                const participantsCol = collection(db, 'artifacts', appId, 'public', 'data', 'participants');
+                
+                // 監聽即時更新 (Rule 2: No Complex Queries)
+                onSnapshot(participantsCol, (snapshot) => {
+                    const names = [];
+                    snapshot.forEach(doc => {
+                        names.push(doc.data().name);
+                    });
+                    
+                    // 在記憶體中排序 (Rule 2)
+                    names.sort();
+
+                    updateUI(names);
+                }, (error) => console.error("Firestore Error:", error));
+            } else {
+                initAuth();
+            }
+        });
+
+        function updateUI(names) {
+            if (names.length === 0) {
+                listContainer.innerHTML = '<p class="text-slate-600 text-xs italic">尚未有人簽到</p>';
+                countBadge.innerText = '0 人';
+                return;
+            }
+
+            countBadge.innerText = `${names.length} 人`;
+            listContainer.innerHTML = names.map(name => `
+                <span class="bg-blue-500/10 border border-blue-500/30 text-blue-300 text-sm px-3 py-1 rounded-lg">
+                    ${name}
+                </span>
+            `).join('');
+        }
+
+        async function handleJoin() {
+            const name = nameInput.value.trim();
+            if (!name || !currentUser) return;
+
+            joinBtn.disabled = true;
+            statusMsg.classList.remove('hidden');
+
+            try {
+                const participantsCol = collection(db, 'artifacts', appId, 'public', 'data', 'participants');
+                await addDoc(participantsCol, {
+                    name: name,
+                    timestamp: serverTimestamp(),
+                    uid: currentUser.uid
+                });
+
+                nameInput.value = '';
+                showToast();
+            } catch (e) {
+                console.error("Error adding document: ", e);
+            } finally {
+                joinBtn.disabled = false;
+                statusMsg.classList.add('hidden');
+            }
+        }
+
+        function showToast() {
+            toast.classList.remove('opacity-0', 'translate-y-10');
+            toast.classList.add('opacity-100', 'translate-y-0');
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-10');
+                toast.classList.remove('opacity-100', 'translate-y-0');
+            }, 3000);
+        }
+
+        joinBtn.addEventListener('click', handleJoin);
+        nameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleJoin();
+        });
+
+    </script>
 </body>
 </html>
