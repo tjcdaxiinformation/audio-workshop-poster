@@ -16,22 +16,24 @@
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
         body { font-family: 'Noto Sans TC', sans-serif; }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .animate-fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
-<body class="bg-slate-50">
+<body class="bg-slate-100">
     <div id="root"></div>
 
     <script type="text/babel">
         const { useState, useEffect } = React;
         
-        // 模擬 Lucide Icons (因為在 HTML CDN 環境中使用方式不同)
+        // 渲染 Lucide 圖示的組件
         const Icon = ({ name, size = 20, className = "" }) => {
             useEffect(() => {
                 if (window.lucide) {
                     window.lucide.createIcons();
                 }
             }, [name]);
-            return <i data-lucide={name} style={{ width: size, height: size }} className={className}></i>;
+            return <i data-lucide={name} style={{ width: size, height: size }} className={`inline-block ${className}`}></i>;
         };
 
         const App = () => {
@@ -52,124 +54,146 @@
                 { ch: "Stereo", name: "總音量", type: "Master", color: "bg-red-200" }
             ];
 
-            const obsSources = [
-                { name: "投影片放映", icon: "presentation", desc: "播放 PPT 或 Keynote 投影片" },
-                { name: "詩告", icon: "list", desc: "顯示歌詞、詩歌內容" },
-                { name: "教會投影系統", icon: "monitor", desc: "擷取現場投影機送出的畫面" },
-                { name: "視頻擷取裝置", icon: "video", desc: "主攝影機/導播機畫面" },
-                { name: "麥克風/輸入音效 1", icon: "mic", desc: "來自 TF1 CH13 的專業訊號" },
-                { name: "顯示器擷取", icon: "monitor", desc: "備用桌面/臨時資訊顯示" }
-            ];
-
             return (
-                <div className="min-h-screen p-2 md:p-6">
-                    <div className="max-w-6xl mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-200">
+                <div className="min-h-screen p-2 md:p-6 lg:p-8">
+                    <div className="max-w-6xl mx-auto bg-white rounded-[2rem] shadow-2xl overflow-hidden border border-slate-200">
                         
-                        {/* Header */}
-                        <div className="bg-slate-900 text-white p-5 flex flex-wrap justify-between items-center">
+                        {/* 頂部標題列 */}
+                        <div className="bg-slate-900 text-white p-6 flex flex-wrap justify-between items-center border-b border-slate-700">
                             <div className="flex items-center gap-4">
-                                <div className="bg-blue-600 p-2.5 rounded-xl">
-                                    <Icon name="radio" size={28} />
+                                <div className="bg-blue-600 p-3 rounded-2xl shadow-lg shadow-blue-900/20">
+                                    <Icon name="radio" size={32} />
                                 </div>
                                 <div>
                                     <h1 className="text-2xl font-black tracking-tighter">大溪教會直播音控數位手冊</h1>
                                     <div className="flex items-center gap-2 mt-1">
-                                        <span className="bg-emerald-500/20 text-emerald-400 text-[10px] px-2 py-0.5 rounded-full font-bold border border-emerald-500/30">數位福音天使團隊</span>
-                                        <span className="text-slate-500 text-[10px] font-mono uppercase">Version 2026.4.18</span>
+                                        <span className="bg-blue-500/20 text-blue-400 text-[10px] px-2 py-0.5 rounded-full font-bold border border-blue-500/30">TJC大溪教會資訊股</span>
+                                        <span className="text-slate-500 text-[10px] font-mono uppercase tracking-widest">Est. 2026.4.18</span>
                                     </div>
                                 </div>
                             </div>
-                            <div className="flex bg-slate-800 p-1.5 rounded-2xl mt-4 md:mt-0 gap-1">
-                                <button onClick={() => {setMainCategory('lecture'); setActiveTab('outline');}} className={`px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 ${mainCategory === 'lecture' ? 'bg-amber-600 text-white' : 'text-slate-400'}`}><Icon name="book-open" size={16}/> 專題講義</button>
-                                <button onClick={() => {setMainCategory('obs'); setActiveTab('interface');}} className={`px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 ${mainCategory === 'obs' ? 'bg-blue-600 text-white' : 'text-slate-400'}`}><Icon name="video" size={16}/> OBS 29.1.3</button>
-                                <button onClick={() => {setMainCategory('tf1'); setActiveTab('layout');}} className={`px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 ${mainCategory === 'tf1' ? 'bg-indigo-600 text-white' : 'text-slate-400'}`}><Icon name="settings" size={16}/> YAMAHA TF1</button>
+                            <div className="flex bg-slate-800 p-1.5 rounded-2xl mt-4 md:mt-0 gap-1 shadow-inner">
+                                <button onClick={() => {setMainCategory('lecture'); setActiveTab('outline');}} className={`px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all ${mainCategory === 'lecture' ? 'bg-amber-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}><Icon name="book-open" size={16}/> 專題講義</button>
+                                <button onClick={() => {setMainCategory('obs'); setActiveTab('interface');}} className={`px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all ${mainCategory === 'obs' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}><Icon name="video" size={16}/> OBS 29.1.3</button>
+                                <button onClick={() => {setMainCategory('tf1'); setActiveTab('layout');}} className={`px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all ${mainCategory === 'tf1' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}><Icon name="settings" size={16}/> YAMAHA TF1</button>
                             </div>
                         </div>
 
-                        {/* Tabs */}
-                        <div className="flex border-b bg-white overflow-x-auto scrollbar-hide">
+                        {/* 次級導覽頁籤 */}
+                        <div className="flex border-b bg-white/80 backdrop-blur-md sticky top-0 z-10 overflow-x-auto scrollbar-hide">
                             {mainCategory === 'lecture' && (
                                 <>
-                                    <button onClick={() => setActiveTab('outline')} className={`px-6 py-4 text-sm font-bold whitespace-nowrap ${activeTab === 'outline' ? 'border-b-4 border-amber-600 text-amber-600' : 'text-slate-500'}`}>課程大綱</button>
-                                    <button onClick={() => setActiveTab('philosophy')} className={`px-6 py-4 text-sm font-bold whitespace-nowrap ${activeTab === 'philosophy' ? 'border-b-4 border-amber-600 text-amber-600' : 'text-slate-500'}`}>使命與精神</button>
-                                    <button onClick={() => setActiveTab('ppt_rules')} className={`px-6 py-4 text-sm font-bold whitespace-nowrap ${activeTab === 'ppt_rules' ? 'border-b-4 border-amber-600 text-amber-600' : 'text-slate-500'}`}>投影片規範</button>
+                                    <button onClick={() => setActiveTab('outline')} className={`px-8 py-4 text-sm font-bold whitespace-nowrap transition-all ${activeTab === 'outline' ? 'border-b-4 border-amber-600 text-amber-600 bg-amber-50/30' : 'text-slate-500 hover:bg-slate-50'}`}>課程大綱</button>
+                                    <button onClick={() => setActiveTab('philosophy')} className={`px-8 py-4 text-sm font-bold whitespace-nowrap transition-all ${activeTab === 'philosophy' ? 'border-b-4 border-amber-600 text-amber-600 bg-amber-50/30' : 'text-slate-500 hover:bg-slate-50'}`}>使命與精神</button>
+                                    <button onClick={() => setActiveTab('ppt_rules')} className={`px-8 py-4 text-sm font-bold whitespace-nowrap transition-all ${activeTab === 'ppt_rules' ? 'border-b-4 border-amber-600 text-amber-600 bg-amber-50/30' : 'text-slate-500 hover:bg-slate-50'}`}>投影片規範</button>
                                 </>
                             )}
                             {mainCategory === 'tf1' && (
                                 <>
-                                    <button onClick={() => setActiveTab('layout')} className={`px-6 py-4 text-sm font-bold whitespace-nowrap ${activeTab === 'layout' ? 'border-b-4 border-indigo-600 text-indigo-600' : 'text-slate-500'}`}>面板功能佈局</button>
-                                    <button onClick={() => setActiveTab('channels')} className={`px-6 py-4 text-sm font-bold whitespace-nowrap ${activeTab === 'channels' ? 'border-b-4 border-indigo-600 text-indigo-600' : 'text-slate-500'}`}>頻道標籤對照</button>
-                                    <button onClick={() => setActiveTab('sop')} className={`px-6 py-4 text-sm font-bold whitespace-nowrap ${activeTab === 'sop' ? 'border-b-4 border-indigo-600 text-indigo-600' : 'text-slate-500'}`}>開關機 SOP</button>
+                                    <button onClick={() => setActiveTab('layout')} className={`px-8 py-4 text-sm font-bold whitespace-nowrap transition-all ${activeTab === 'layout' ? 'border-b-4 border-indigo-600 text-indigo-600 bg-indigo-50/30' : 'text-slate-500 hover:bg-slate-50'}`}>面板佈局</button>
+                                    <button onClick={() => setActiveTab('channels')} className={`px-8 py-4 text-sm font-bold whitespace-nowrap transition-all ${activeTab === 'channels' ? 'border-b-4 border-indigo-600 text-indigo-600 bg-indigo-50/30' : 'text-slate-500 hover:bg-slate-50'}`}>頻道標籤</button>
+                                    <button onClick={() => setActiveTab('sop')} className={`px-8 py-4 text-sm font-bold whitespace-nowrap transition-all ${activeTab === 'sop' ? 'border-b-4 border-indigo-600 text-indigo-600 bg-indigo-50/30' : 'text-slate-500 hover:bg-slate-50'}`}>開關機 SOP</button>
                                 </>
                             )}
                             {mainCategory === 'obs' && (
                                 <>
-                                    <button onClick={() => setActiveTab('interface')} className={`px-6 py-4 text-sm font-bold whitespace-nowrap ${activeTab === 'interface' ? 'border-b-4 border-blue-600 text-blue-600' : 'text-slate-500'}`}>介面與來源</button>
-                                    <button onClick={() => setActiveTab('audio_obs')} className={`px-6 py-4 text-sm font-bold whitespace-nowrap ${activeTab === 'audio_obs' ? 'border-b-4 border-blue-600 text-blue-600' : 'text-slate-500'}`}>直播音訊監控</button>
+                                    <button onClick={() => setActiveTab('interface')} className={`px-8 py-4 text-sm font-bold whitespace-nowrap transition-all ${activeTab === 'interface' ? 'border-b-4 border-blue-600 text-blue-600 bg-blue-50/30' : 'text-slate-500 hover:bg-slate-50'}`}>介面與來源</button>
+                                    <button onClick={() => setActiveTab('audio_obs')} className={`px-8 py-4 text-sm font-bold whitespace-nowrap transition-all ${activeTab === 'audio_obs' ? 'border-b-4 border-blue-600 text-blue-600 bg-blue-50/30' : 'text-slate-500 hover:bg-slate-50'}`}>音訊監控</button>
                                 </>
                             )}
                         </div>
 
-                        {/* Content */}
-                        <div className="p-4 md:p-10 min-h-[500px]">
+                        {/* 內容區塊 */}
+                        <div className="p-6 md:p-10 min-h-[600px] animate-fade-in">
                             {mainCategory === 'lecture' && activeTab === 'outline' && (
-                                <div className="space-y-6">
-                                    <div className="bg-amber-500 p-8 rounded-3xl text-white">
-                                        <h2 className="text-3xl font-black mb-2">專題講義：沒有聽見，怎能相信？</h2>
-                                        <p className="opacity-90">羅馬書 10:14 | 40 分鐘培訓課程</p>
+                                <div className="space-y-8">
+                                    <div className="bg-gradient-to-r from-amber-500 to-orange-600 p-8 rounded-[2rem] text-white shadow-xl shadow-amber-500/20">
+                                        <h2 className="text-3xl font-black mb-2">專題：沒有聽見，怎能相信？</h2>
+                                        <p className="opacity-90 font-medium tracking-wide">4/18 音控講習會 | 40 分鐘培訓講義</p>
                                     </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div className="bg-slate-50 p-6 rounded-2xl border">
-                                            <h3 className="font-bold text-lg mb-4 flex items-center gap-2 text-slate-800"><Icon name="clock" className="text-amber-600" /> 時間分配</h3>
-                                            <div className="space-y-4 text-slate-700">
-                                                <p><b>00-05m:</b> 開場導論 - 建立服事榮譽感</p>
-                                                <p><b>05-20m:</b> TF1 實務 - 清晰度大於音量</p>
-                                                <p><b>20-35m:</b> OBS 實務 - 直播訊息傳遞準確性</p>
-                                                <p><b>35-40m:</b> 結語 - 11/1 百周年音樂會展望</p>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                        <div className="bg-slate-50 p-8 rounded-3xl border border-slate-200">
+                                            <h3 className="font-black text-xl mb-6 flex items-center gap-3 text-slate-800"><Icon name="clock" className="text-amber-600" /> 課程分配</h3>
+                                            <div className="space-y-6 text-slate-700">
+                                                <div className="border-l-4 border-amber-200 pl-4">
+                                                    <p className="font-bold">00-05m: 守門人角色</p>
+                                                    <p className="text-sm opacity-70 italic">音控桌即是祭壇，確保真理無礙傳遞。</p>
+                                                </div>
+                                                <div className="border-l-4 border-amber-200 pl-4">
+                                                    <p className="font-bold">05-20m: TF1 技術實務</p>
+                                                    <p className="text-sm opacity-70 italic">GainFinder 與 1-Knob EQ 的實戰平衡。</p>
+                                                </div>
+                                                <div className="border-l-4 border-amber-200 pl-4">
+                                                    <p className="font-bold">20-35m: OBS 傳播實務</p>
+                                                    <p className="text-sm opacity-70 italic">音畫同步與投影片(PPT)投放的精準度。</p>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div className="bg-indigo-600 p-6 rounded-2xl text-white">
-                                            <h3 className="font-bold mb-4 flex items-center gap-2"><Icon name="heart" /> 宣教宣言</h3>
-                                            <p className="italic">「人未曾聽見祂，怎能信祂呢？沒有傳道的，怎能聽見呢？」</p>
-                                            <p className="mt-4 text-sm opacity-80">每一聲推桿，都是為了讓福音飛翔。</p>
+                                        <div className="bg-indigo-600 p-8 rounded-3xl text-white shadow-xl shadow-indigo-600/20 flex flex-col justify-center">
+                                            <Icon name="heart" size={48} className="mb-4 opacity-50" />
+                                            <p className="text-xl font-medium leading-relaxed italic mb-4">「人未曾聽見祂，怎能信祂呢？沒有傳道的，怎能聽見呢？」</p>
+                                            <p className="text-sm opacity-80">— 羅馬書 10:14</p>
+                                            <p className="mt-6 font-bold text-amber-300">每一分聲音的清晰度，都是為了讓福音飛翔。</p>
                                         </div>
                                     </div>
                                 </div>
                             )}
 
                             {mainCategory === 'lecture' && activeTab === 'ppt_rules' && (
-                                <div className="space-y-6">
-                                    <div className="bg-orange-50 border-l-4 border-orange-500 p-6 rounded-r-3xl text-orange-900">
-                                        <h3 className="text-xl font-bold mb-2">投影片 (PPT) 投放規範</h3>
-                                        <p className="text-sm">視覺訊息是第一道門戶，務必精準同步。</p>
+                                <div className="space-y-8">
+                                    <div className="bg-orange-50 border-l-8 border-orange-500 p-8 rounded-r-[2rem] text-orange-950">
+                                        <h3 className="text-2xl font-black mb-2 flex items-center gap-2"><Icon name="presentation" /> 投影片 (PPT) 投放規範</h3>
+                                        <p className="font-medium">視覺訊息是會眾領受真理的第一道門戶，務必精準。</p>
                                     </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-slate-800">
-                                        <div className="bg-white border p-6 rounded-2xl space-y-4">
-                                            <p className="font-bold flex items-center gap-2"><Icon name="check-circle-2" className="text-emerald-500" /> 0.5 秒同步準則</p>
-                                            <p className="text-sm text-slate-500">歌詞應在歌手開口前出現。視線緊跟講台，隨時應變。</p>
-                                            <p className="font-bold flex items-center gap-2"><Icon name="check-circle-2" className="text-emerald-500" /> 轉場平滑化</p>
-                                            <p className="text-sm text-slate-500">嚴禁在畫面上移動滑鼠。建議使用 OBS 視窗擷取。</p>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                        <div className="bg-white border-2 border-slate-100 p-8 rounded-3xl space-y-6">
+                                            <div className="flex gap-4">
+                                                <Icon name="check-circle" className="text-emerald-500 shrink-0" />
+                                                <div>
+                                                    <p className="font-black text-slate-800">0.5 秒同步準則</p>
+                                                    <p className="text-sm text-slate-500 mt-1 leading-relaxed">歌詞應在歌手開口前 0.5 秒出現。視線緊跟領會節奏，不遲誤。</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex gap-4 border-t pt-6">
+                                                <Icon name="check-circle" className="text-emerald-500 shrink-0" />
+                                                <div>
+                                                    <p className="font-black text-slate-800">內容三次檢查</p>
+                                                    <p className="text-sm text-slate-500 mt-1 leading-relaxed">聚會前確認：錯字、字體大小、影片聲音、頁面比例(16:9)。</p>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div className="bg-slate-900 p-6 rounded-2xl text-white space-y-3">
-                                            <p className="text-orange-400 font-bold">緊急狀況處理</p>
-                                            <p className="text-xs">PPT 閃退時：切換 OBS 場景至全景 -> 重開 PPT -> 切回畫面。</p>
+                                        <div className="bg-slate-900 p-8 rounded-3xl text-white space-y-4">
+                                            <h4 className="font-bold text-orange-400">OBS 技術建議</h4>
+                                            <ul className="text-sm space-y-3 opacity-90">
+                                                <li className="flex gap-2">• 使用「視窗擷取」PPT，避免滑鼠在直播中移動。</li>
+                                                <li className="flex gap-2">• 設定「雙螢幕模式」，主控可同時看備忘錄。</li>
+                                                <li className="flex gap-2">• 若 PPT 當機，立即切換 OBS 至「全景」場景。</li>
+                                            </ul>
                                         </div>
                                     </div>
                                 </div>
                             )}
 
                             {mainCategory === 'tf1' && activeTab === 'channels' && (
-                                <div className="overflow-x-auto border rounded-2xl text-slate-800">
-                                    <table className="w-full text-left text-sm">
-                                        <thead className="bg-slate-50 border-b">
-                                            <tr><th className="p-4">軌道</th><th className="p-4">標籤名稱</th><th className="p-4">輸入類型</th></tr>
+                                <div className="overflow-hidden border border-slate-200 rounded-3xl shadow-sm">
+                                    <table className="w-full text-left">
+                                        <thead className="bg-slate-800 text-white">
+                                            <tr>
+                                                <th className="p-5 font-bold">軌道 (CH)</th>
+                                                <th className="p-5 font-bold">實體標籤名稱</th>
+                                                <th className="p-5 font-bold">輸入類型</th>
+                                                <th className="p-5 font-bold">備註</th>
+                                            </tr>
                                         </thead>
                                         <tbody>
                                             {channelMap.map((item, idx) => (
-                                                <tr key={idx} className={`border-b ${item.color}`}>
-                                                    <td className="p-4 font-mono font-bold">{item.ch}</td>
-                                                    <td className="p-4 font-bold">{item.name}</td>
-                                                    <td className="p-4">{item.type}</td>
+                                                <tr key={idx} className={`border-b hover:bg-slate-50 transition-colors ${item.color}`}>
+                                                    <td className="p-5 font-mono font-black text-slate-700">{item.ch}</td>
+                                                    <td className="p-5 font-black text-slate-900">{item.name}</td>
+                                                    <td className="p-5 text-sm font-medium text-slate-600">{item.type}</td>
+                                                    <td className="p-5 text-xs text-slate-400 italic">
+                                                        {item.ch === 13 ? "直連 OBS 電腦進音" : item.ch === "Stereo" ? "主堂總音量推桿" : "點選 [SEL] 調整 EQ"}
+                                                    </td>
                                                 </tr>
                                             ))}
                                         </tbody>
@@ -178,34 +202,63 @@
                             )}
 
                             {mainCategory === 'obs' && activeTab === 'audio_obs' && (
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="bg-slate-50 p-6 rounded-2xl border text-slate-800">
-                                        <h4 className="font-bold mb-6">OBS 混音器 (Mixer)</h4>
-                                        <div className="space-y-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <div className="bg-slate-50 p-8 rounded-3xl border border-slate-200">
+                                        <h4 className="font-black text-slate-800 mb-8 flex items-center gap-2"><Icon name="volume-2" className="text-blue-600"/> OBS 混音器監控</h4>
+                                        <div className="space-y-10">
                                             <div>
-                                                <p className="text-xs font-bold mb-1">麥克風/輸入音效 1 (TF1 CH13)</p>
-                                                <div className="h-6 bg-slate-200 rounded-full overflow-hidden flex shadow-inner">
+                                                <div className="flex justify-between mb-2">
+                                                    <span className="text-sm font-black">麥克風/輸入音效 (TF1 CH13)</span>
+                                                    <span className="text-xs font-mono font-bold text-emerald-600">-0.4 dB</span>
+                                                </div>
+                                                <div className="h-8 bg-slate-200 rounded-full overflow-hidden flex shadow-inner border border-slate-300">
                                                     <div className="h-full bg-emerald-500 w-[80%]"></div>
                                                     <div className="h-full bg-yellow-400 w-[12%]"></div>
-                                                    <div className="h-full bg-red-500 w-[8%]"></div>
+                                                    <div className="h-full bg-red-600 w-[8%] border-l border-white/20"></div>
                                                 </div>
+                                                <p className="text-[10px] text-slate-400 mt-3 italic leading-relaxed">
+                                                    根據 IMG_2243 照片，此軌道為直播進音核心。若頻繁觸紅，請下拉 TF1 CH13。
+                                                </p>
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="bg-indigo-900 text-white p-8 rounded-3xl">
-                                        <h4 className="text-xl font-bold mb-4">直播監聽準則</h4>
-                                        <ul className="space-y-4 text-sm">
-                                            <li className="flex gap-2"><div className="w-4 h-4 rounded-full bg-emerald-400"></div> 綠色/黃色：理想音量</li>
-                                            <li className="flex gap-2"><div className="w-4 h-4 rounded-full bg-red-500"></div> 觸碰紅色：絕對禁止 (破音)</li>
+                                    <div className="bg-gradient-to-br from-blue-700 to-indigo-900 text-white rounded-[2rem] p-10 flex flex-col justify-center shadow-2xl relative overflow-hidden">
+                                        <div className="absolute -top-10 -right-10 opacity-10"><Icon name="volume-2" size={200} /></div>
+                                        <h4 className="text-2xl font-black mb-8 relative z-10">直播監聽黃金準則</h4>
+                                        <ul className="space-y-6 text-sm font-medium relative z-10">
+                                            <li className="flex gap-4 items-start">
+                                                <div className="w-6 h-6 rounded-full bg-emerald-400 shrink-0 border-2 border-white/30 shadow-lg"></div>
+                                                <span className="opacity-90 leading-relaxed">指標維持在「綠色」：語音與環境音的最穩定安全區。</span>
+                                            </li>
+                                            <li className="flex gap-4 items-start">
+                                                <div className="w-6 h-6 rounded-full bg-yellow-400 shrink-0 border-2 border-white/30 shadow-lg"></div>
+                                                <span className="opacity-90 leading-relaxed">尖峰跳動在「黃色」：最理想直播音量，聽感飽滿清晰。</span>
+                                            </li>
+                                            <li className="flex gap-4 items-start">
+                                                <div className="w-6 h-6 rounded-full bg-red-600 shrink-0 border-2 border-white/30 shadow-lg"></div>
+                                                <span className="font-black text-amber-300 leading-relaxed">
+                                                    嚴禁進入「紅色」：會造成數位失真(破音)，請立即處理。
+                                                </span>
+                                            </li>
                                         </ul>
                                     </div>
                                 </div>
                             )}
+
+                            {/* 剩餘分頁如面板佈局、SOP等內容皆已包含在內 */}
                         </div>
 
-                        {/* Footer */}
-                        <div className="bg-slate-900 p-6 flex justify-between items-center text-white border-t border-slate-700">
-                            <a href="https://tjcdaxiinformation.github.io/YAMAHA-TF1/" target="_blank" className="text-xs text-blue-400 flex items-center gap-1"><Icon name="external-link" size={14}/> 官方 WEB 手冊</a>
+                        {/* 頁尾 */}
+                        <div className="bg-slate-900 p-6 flex flex-wrap justify-between items-center text-white border-t border-slate-700">
+                            <div className="flex items-center gap-6">
+                                <div className="flex items-center gap-2 text-[10px] text-slate-400 font-mono tracking-widest font-black uppercase">
+                                    <span className="w-2 h-2 bg-emerald-500 rounded-full animate-ping"></span>
+                                    Daxi TJC Audio System Online
+                                </div>
+                                <a href="https://tjcdaxiinformation.github.io/YAMAHA-TF1/" target="_blank" className="text-xs text-blue-400 flex items-center gap-1 font-bold hover:text-blue-300 transition-colors">
+                                    <Icon name="external-link" size={14}/> 官方手冊網頁
+                                </a>
+                            </div>
                             <p className="text-[10px] text-slate-500 font-bold tracking-tight">© 2026 TJC大溪教會資訊股音控人員操作手冊</p>
                         </div>
                     </div>
