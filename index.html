@@ -130,11 +130,11 @@
                         <span id="participant-count" class="text-blue-400 text-xs font-bold bg-blue-400/10 px-2 py-0.5 rounded-full">0 人</span>
                     </div>
                     <div id="participant-list" class="flex flex-wrap gap-2 max-h-32 overflow-y-auto pr-2 custom-scrollbar">
-                        <p class="text-slate-500 text-xs italic">等待系統配置中...</p>
+                        <p class="text-slate-500 text-xs italic">正在載入系統...</p>
                     </div>
                 </div>
 
-                <p class="text-center text-slate-500 text-[10px] uppercase tracking-widest pt-4">
+                <p id="env-status" class="text-center text-slate-600 text-[10px] uppercase tracking-widest pt-4">
                     音控講習會 &bull; 資訊股
                 </p>
             </div>
@@ -146,7 +146,6 @@
         <span id="toast-text">✅ 報名成功！期待見到您。</span>
     </div>
 
-    <!-- Firebase 整合腳本 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -159,43 +158,44 @@
         const errorMsg = document.getElementById('error-msg');
         const toast = document.getElementById('toast');
         const toastText = document.getElementById('toast-text');
+        const envStatus = document.getElementById('env-status');
 
         let db, auth, appId;
         let currentUser = null;
         let existingNames = [];
+        let isCloudMode = false;
 
-        // 啟動流程優化
         async function startApp() {
-            try {
-                // 安全檢查配置是否存在
-                if (typeof __firebase_config === 'undefined') {
-                    console.log("Environment configuration not yet injected.");
-                    return;
+            // 偵測是否在具有 Firebase 配置的環境執行
+            if (typeof __firebase_config !== 'undefined') {
+                try {
+                    const firebaseConfig = JSON.parse(__firebase_config);
+                    const app = initializeApp(firebaseConfig);
+                    auth = getAuth(app);
+                    db = getFirestore(app);
+                    appId = typeof __app_id !== 'undefined' ? __app_id : 'audio-workshop-default';
+                    isCloudMode = true;
+
+                    await initAuth();
+                    onAuthStateChanged(auth, (user) => {
+                        currentUser = user;
+                        if (user) setupListListener();
+                    });
+                    console.log("Cloud mode initialized.");
+                } catch (err) {
+                    console.error("Cloud init failed, fallback to local:", err);
+                    switchToLocalMode();
                 }
-
-                const firebaseConfig = JSON.parse(__firebase_config);
-                const app = initializeApp(firebaseConfig);
-                auth = getAuth(app);
-                db = getFirestore(app);
-                appId = typeof __app_id !== 'undefined' ? __app_id : 'audio-workshop-default';
-
-                // 規則 3: 先執行認證
-                await initAuth();
-
-                onAuthStateChanged(auth, (user) => {
-                    currentUser = user;
-                    if (user) {
-                        setupListListener();
-                    }
-                });
-
-            } catch (err) {
-                console.error("Initialization Error:", err);
-                // 僅在發生非預期錯誤時顯示
-                if (err.message !== "Missing configuration") {
-                    listContainer.innerHTML = '<p class="text-amber-400 text-xs italic">系統嘗試連線中...</p>';
-                }
+            } else {
+                console.log("No config found, running in Local Mode.");
+                switchToLocalMode();
             }
+        }
+
+        function switchToLocalMode() {
+            isCloudMode = false;
+            envStatus.innerText = "展示模式 (數據不會永久儲存)";
+            updateUI([]);
         }
 
         async function initAuth() {
@@ -205,24 +205,19 @@
                 } else {
                     await signInAnonymously(auth);
                 }
-            } catch (err) {
-                console.error("Auth Error:", err);
-            }
+            } catch (err) { console.error("Auth Error:", err); }
         }
 
         function setupListListener() {
             const participantsCol = collection(db, 'artifacts', appId, 'public', 'data', 'participants');
             onSnapshot(participantsCol, (snapshot) => {
                 const names = [];
-                snapshot.forEach(doc => {
-                    if (doc.data().name) names.push(doc.data().name);
-                });
+                snapshot.forEach(doc => { if (doc.data().name) names.push(doc.data().name); });
                 existingNames = names;
-                names.sort();
-                updateUI(names);
+                updateUI([...new Set(names)].sort());
             }, (error) => {
                 console.error("Snapshot Error:", error);
-                listContainer.innerHTML = '<p class="text-red-400 text-xs italic">目前無法同步名單</p>';
+                switchToLocalMode();
             });
         }
 
@@ -243,13 +238,25 @@
         async function handleJoin() {
             const name = nameInput.value.trim();
             if (!name) { showError("請輸入姓名後再點擊參加"); return; }
-            if (!currentUser || !db) { showError("系統連線中，請稍候..."); return; }
             if (existingNames.includes(name)) { showError("此姓名已在名單中囉！"); return; }
 
             errorMsg.classList.add('hidden');
             joinBtn.disabled = true;
             const originalContent = joinBtn.innerHTML;
             joinBtn.innerHTML = '<div class="loading-spinner"></div>';
+
+            if (!isCloudMode) {
+                // 本地模式：模擬延遲後更新 UI
+                setTimeout(() => {
+                    existingNames.push(name);
+                    updateUI([...new Set(existingNames)].sort());
+                    nameInput.value = '';
+                    joinBtn.disabled = false;
+                    joinBtn.innerHTML = originalContent;
+                    showToast(`✅ ${name} 簽到成功！`);
+                }, 500);
+                return;
+            }
 
             try {
                 const participantsCol = collection(db, 'artifacts', appId, 'public', 'data', 'participants');
