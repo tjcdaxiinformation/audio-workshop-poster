@@ -130,7 +130,7 @@
                         <span id="participant-count" class="text-blue-400 text-xs font-bold bg-blue-400/10 px-2 py-0.5 rounded-full">0 人</span>
                     </div>
                     <div id="participant-list" class="flex flex-wrap gap-2 max-h-32 overflow-y-auto pr-2 custom-scrollbar">
-                        <p class="text-slate-600 text-xs italic">正在連接伺服器...</p>
+                        <p class="text-slate-500 text-xs italic">等待系統配置中...</p>
                     </div>
                 </div>
 
@@ -152,7 +152,6 @@
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // UI 元素引用
         const nameInput = document.getElementById('user-name');
         const joinBtn = document.getElementById('join-btn');
         const listContainer = document.getElementById('participant-list');
@@ -165,10 +164,15 @@
         let currentUser = null;
         let existingNames = [];
 
-        // 核心初始化函式
+        // 啟動流程優化
         async function startApp() {
             try {
-                // 從環境變數讀取配置 (Mandatory Patterns)
+                // 安全檢查配置是否存在
+                if (typeof __firebase_config === 'undefined') {
+                    console.log("Environment configuration not yet injected.");
+                    return;
+                }
+
                 const firebaseConfig = JSON.parse(__firebase_config);
                 const app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
@@ -178,7 +182,6 @@
                 // 規則 3: 先執行認證
                 await initAuth();
 
-                // 監聽認證狀態變更
                 onAuthStateChanged(auth, (user) => {
                     currentUser = user;
                     if (user) {
@@ -188,7 +191,10 @@
 
             } catch (err) {
                 console.error("Initialization Error:", err);
-                listContainer.innerHTML = '<p class="text-amber-400 text-xs">等待雲端配置中...</p>';
+                // 僅在發生非預期錯誤時顯示
+                if (err.message !== "Missing configuration") {
+                    listContainer.innerHTML = '<p class="text-amber-400 text-xs italic">系統嘗試連線中...</p>';
+                }
             }
         }
 
@@ -205,23 +211,18 @@
         }
 
         function setupListListener() {
-            // 規則 1: 嚴格路徑結構
             const participantsCol = collection(db, 'artifacts', appId, 'public', 'data', 'participants');
-            
-            // 規則 2: 不使用複雜查詢
             onSnapshot(participantsCol, (snapshot) => {
                 const names = [];
                 snapshot.forEach(doc => {
                     if (doc.data().name) names.push(doc.data().name);
                 });
-                
                 existingNames = names;
-                // 在記憶體中進行排序
                 names.sort();
                 updateUI(names);
             }, (error) => {
                 console.error("Snapshot Error:", error);
-                listContainer.innerHTML = '<p class="text-red-400 text-xs">暫時無法讀取名單</p>';
+                listContainer.innerHTML = '<p class="text-red-400 text-xs italic">目前無法同步名單</p>';
             });
         }
 
@@ -231,7 +232,6 @@
                 countBadge.innerText = '0 人';
                 return;
             }
-
             countBadge.innerText = `${names.length} 人`;
             listContainer.innerHTML = names.map(name => `
                 <span class="bg-blue-500/10 border border-blue-500/30 text-blue-300 text-sm px-3 py-1 rounded-lg">
@@ -242,21 +242,9 @@
 
         async function handleJoin() {
             const name = nameInput.value.trim();
-            
-            if (!name) {
-                showError("請輸入姓名後再點擊參加");
-                return;
-            }
-
-            if (!currentUser) {
-                showError("系統連線中，請稍候...");
-                return;
-            }
-
-            if (existingNames.includes(name)) {
-                showError("此姓名已在名單中囉！");
-                return;
-            }
+            if (!name) { showError("請輸入姓名後再點擊參加"); return; }
+            if (!currentUser || !db) { showError("系統連線中，請稍候..."); return; }
+            if (existingNames.includes(name)) { showError("此姓名已在名單中囉！"); return; }
 
             errorMsg.classList.add('hidden');
             joinBtn.disabled = true;
@@ -270,7 +258,6 @@
                     timestamp: serverTimestamp(),
                     uid: currentUser.uid
                 });
-
                 nameInput.value = '';
                 showToast(`✅ ${name} 簽到成功！`);
             } catch (e) {
@@ -298,15 +285,9 @@
             }, 3000);
         }
 
-        // 啟動應用
         startApp();
-
-        // 事件監聽
         joinBtn.addEventListener('click', handleJoin);
-        nameInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') handleJoin();
-        });
-
+        nameInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleJoin(); });
     </script>
 </body>
 </html>
