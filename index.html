@@ -165,9 +165,11 @@
         let existingNames = [];
         let isCloudMode = false;
 
+        const LOCAL_STORAGE_KEY = 'audio_workshop_participants';
+
         async function startApp() {
-            // 偵測是否在具有 Firebase 配置的環境執行
-            if (typeof __firebase_config !== 'undefined') {
+            // 偵測環境配置
+            if (typeof __firebase_config !== 'undefined' && __firebase_config) {
                 try {
                     const firebaseConfig = JSON.parse(__firebase_config);
                     const app = initializeApp(firebaseConfig);
@@ -179,23 +181,30 @@
                     await initAuth();
                     onAuthStateChanged(auth, (user) => {
                         currentUser = user;
-                        if (user) setupListListener();
+                        if (user) {
+                            envStatus.innerText = "雲端同步模式";
+                            setupListListener();
+                        }
                     });
-                    console.log("Cloud mode initialized.");
                 } catch (err) {
-                    console.error("Cloud init failed, fallback to local:", err);
+                    console.warn("Cloud init failed, switching to persistent local mode.");
                     switchToLocalMode();
                 }
             } else {
-                console.log("No config found, running in Local Mode.");
                 switchToLocalMode();
             }
         }
 
         function switchToLocalMode() {
             isCloudMode = false;
-            envStatus.innerText = "展示模式 (數據不會永久儲存)";
-            updateUI([]);
+            envStatus.innerText = "本地儲存模式 (資料已儲存於您的瀏覽器)";
+            
+            // 從 localStorage 讀取資料
+            const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+            if (saved) {
+                existingNames = JSON.parse(saved);
+            }
+            updateUI(existingNames);
         }
 
         async function initAuth() {
@@ -213,8 +222,8 @@
             onSnapshot(participantsCol, (snapshot) => {
                 const names = [];
                 snapshot.forEach(doc => { if (doc.data().name) names.push(doc.data().name); });
-                existingNames = names;
-                updateUI([...new Set(names)].sort());
+                existingNames = [...new Set(names)].sort();
+                updateUI(existingNames);
             }, (error) => {
                 console.error("Snapshot Error:", error);
                 switchToLocalMode();
@@ -222,7 +231,7 @@
         }
 
         function updateUI(names) {
-            if (names.length === 0) {
+            if (!names || names.length === 0) {
                 listContainer.innerHTML = '<p class="text-slate-600 text-xs italic">目前尚無人簽到</p>';
                 countBadge.innerText = '0 人';
                 return;
@@ -246,15 +255,18 @@
             joinBtn.innerHTML = '<div class="loading-spinner"></div>';
 
             if (!isCloudMode) {
-                // 本地模式：模擬延遲後更新 UI
+                // 本地儲存邏輯
                 setTimeout(() => {
                     existingNames.push(name);
-                    updateUI([...new Set(existingNames)].sort());
+                    existingNames = [...new Set(existingNames)].sort();
+                    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(existingNames));
+                    
+                    updateUI(existingNames);
                     nameInput.value = '';
                     joinBtn.disabled = false;
                     joinBtn.innerHTML = originalContent;
-                    showToast(`✅ ${name} 簽到成功！`);
-                }, 500);
+                    showToast(`✅ ${name} 簽到成功！資料已儲存。`);
+                }, 400);
                 return;
             }
 
@@ -266,7 +278,7 @@
                     uid: currentUser.uid
                 });
                 nameInput.value = '';
-                showToast(`✅ ${name} 簽到成功！`);
+                showToast(`✅ ${name} 簽到成功！已同步至雲端。`);
             } catch (e) {
                 console.error("Add Doc Error:", e);
                 showError("傳送失敗，請再試一次");
