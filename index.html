@@ -1,570 +1,251 @@
-import React, { useState } from 'react';
-import { Settings, Power, Volume2, Mic, Music, Layout, HelpCircle, AlertTriangle, Monitor, Video, Radio, List, ShieldAlert, BookOpen, Clock, Users, Heart, Presentation, ExternalLink, Info, CheckCircle2 } from 'lucide-react';
-
-const App = () => {
-  const [mainCategory, setMainCategory] = useState('lecture'); // 'tf1', 'obs', or 'lecture'
-  const [activeTab, setActiveTab] = useState('outline');
-
-  const channelMap = [
-    { ch: 1, name: "電腦音 / 主領翻譯", type: "Input", color: "bg-blue-100" },
-    { ch: 2, name: "一、領唱", type: "Mic", color: "bg-green-100" },
-    { ch: 3, name: "二、領唱", type: "Mic", color: "bg-green-100" },
-    { ch: 4, name: "三、領唱", type: "Mic", color: "bg-green-100" },
-    { ch: "5-8", name: "無線麥克風", type: "Mic", color: "bg-green-50" },
-    { ch: 9, name: "詩班收音", type: "Mic", color: "bg-yellow-100" },
-    { ch: 10, name: "鋼琴", type: "Inst", color: "bg-yellow-100" },
-    { ch: 11, name: "預備麥克風", type: "Mic", color: "bg-gray-100" },
-    { ch: 13, name: "錄音輸出 (勿動)", type: "Output", color: "bg-red-100" },
-    { ch: "ST IN", name: "講台音源", type: "Input", color: "bg-orange-100" },
-    { ch: "Stereo", name: "總音量", type: "Master", color: "bg-red-200" }
-  ];
-
-  const obsSources = [
-    { name: "投影片放映", icon: <Presentation size={14} />, desc: "播放 PPT 或 Keynote 投影片" },
-    { name: "詩告", icon: <List size={14} />, desc: "顯示歌詞、詩歌內容" },
-    { name: "教會投影系統", icon: <Monitor size={14} />, desc: "擷取現場投影機送出的畫面" },
-    { name: "視頻擷取裝置", icon: <Video size={14} />, desc: "主攝影機/導播機畫面" },
-    { name: "麥克風/輸入音效 1", icon: <Mic size={14} />, desc: "來自 TF1 CH13 的專業混音訊號" },
-    { name: "顯示器擷取", icon: <Monitor size={14} />, desc: "備用桌面/臨時資訊顯示" }
-  ];
-
-  return (
-    <div className="min-h-screen bg-slate-50 p-2 md:p-6 font-sans text-slate-900">
-      <div className="max-w-6xl mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-200">
-        
-        {/* Main Navigation Header */}
-        <div className="bg-slate-900 text-white p-5 flex flex-wrap justify-between items-center border-b border-slate-700">
-          <div className="flex items-center gap-4">
-            <div className="bg-blue-600 p-2.5 rounded-xl shadow-inner">
-              <Radio className="text-white" size={28} />
-            </div>
-            <div>
-              <h1 className="text-2xl font-black tracking-tighter text-white">大溪教會直播音控數位手冊</h1>
-              <div className="flex items-center gap-2 mt-1">
-                <span className="bg-emerald-500/20 text-emerald-400 text-[10px] px-2 py-0.5 rounded-full font-bold border border-emerald-500/30">數位福音天使團隊</span>
-                <span className="text-slate-500 text-[10px] font-mono uppercase">Version 2026.4.18</span>
-              </div>
-            </div>
-          </div>
-          <div className="flex bg-slate-800 p-1.5 rounded-2xl mt-4 md:mt-0 flex-wrap gap-1">
-            <button 
-              onClick={() => {setMainCategory('lecture'); setActiveTab('outline');}}
-              className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${mainCategory === 'lecture' ? 'bg-amber-600 text-white shadow-lg' : 'text-slate-400 hover:text-white hover:bg-slate-700'}`}
-            >
-              <BookOpen size={16}/> 專題講義
-            </button>
-            <button 
-              onClick={() => {setMainCategory('obs'); setActiveTab('interface');}}
-              className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${mainCategory === 'obs' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-white hover:bg-slate-700'}`}
-            >
-              <Video size={16}/> OBS 29.1.3
-            </button>
-            <button 
-              onClick={() => {setMainCategory('tf1'); setActiveTab('layout');}}
-              className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${mainCategory === 'tf1' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:text-white hover:bg-slate-700'}`}
-            >
-              <Settings size={16}/> YAMAHA TF1
-            </button>
-          </div>
-        </div>
-
-        {/* Sub Navigation (Dynamic) */}
-        <div className="flex border-b bg-white/80 backdrop-blur-md sticky top-0 z-10 overflow-x-auto">
-          {mainCategory === 'lecture' ? (
-            <>
-              <button onClick={() => setActiveTab('outline')} className={`px-6 py-4 text-sm font-bold whitespace-nowrap transition-all ${activeTab === 'outline' ? 'border-b-4 border-amber-600 text-amber-600 bg-amber-50/50' : 'text-slate-500 hover:bg-slate-50'}`}>課程大綱</button>
-              <button onClick={() => setActiveTab('philosophy')} className={`px-6 py-4 text-sm font-bold whitespace-nowrap transition-all ${activeTab === 'philosophy' ? 'border-b-4 border-amber-600 text-amber-600 bg-amber-50/50' : 'text-slate-500 hover:bg-slate-50'}`}>使命與精神</button>
-              <button onClick={() => setActiveTab('ppt_rules')} className={`px-6 py-4 text-sm font-bold whitespace-nowrap transition-all ${activeTab === 'ppt_rules' ? 'border-b-4 border-amber-600 text-amber-600 bg-amber-50/50' : 'text-slate-500 hover:bg-slate-50'}`}>投影片規範</button>
-              <button onClick={() => setActiveTab('practical')} className={`px-6 py-4 text-sm font-bold whitespace-nowrap transition-all ${activeTab === 'practical' ? 'border-b-4 border-amber-600 text-amber-600 bg-amber-50/50' : 'text-slate-500 hover:bg-slate-50'}`}>實務操作要點</button>
-            </>
-          ) : mainCategory === 'tf1' ? (
-            <>
-              <button onClick={() => setActiveTab('layout')} className={`px-6 py-4 text-sm font-bold whitespace-nowrap transition-all ${activeTab === 'layout' ? 'border-b-4 border-indigo-600 text-indigo-600 bg-indigo-50/50' : 'text-slate-500 hover:bg-slate-50'}`}>面板功能佈局</button>
-              <button onClick={() => setActiveTab('channels')} className={`px-6 py-4 text-sm font-bold whitespace-nowrap transition-all ${activeTab === 'channels' ? 'border-b-4 border-indigo-600 text-indigo-600 bg-indigo-50/50' : 'text-slate-500 hover:bg-slate-50'}`}>頻道標籤對照</button>
-              <button onClick={() => setActiveTab('sop')} className={`px-6 py-4 text-sm font-bold whitespace-nowrap transition-all ${activeTab === 'sop' ? 'border-b-4 border-indigo-600 text-indigo-600 bg-indigo-50/50' : 'text-slate-500 hover:bg-slate-50'}`}>開關機 SOP</button>
-            </>
-          ) : (
-            <>
-              <button onClick={() => setActiveTab('interface')} className={`px-6 py-4 text-sm font-bold whitespace-nowrap transition-all ${activeTab === 'interface' ? 'border-b-4 border-blue-600 text-blue-600 bg-blue-50/50' : 'text-slate-500 hover:bg-slate-50'}`}>介面與來源</button>
-              <button onClick={() => setActiveTab('audio_obs')} className={`px-6 py-4 text-sm font-bold whitespace-nowrap transition-all ${activeTab === 'audio_obs' ? 'border-b-4 border-blue-600 text-blue-600 bg-blue-50/50' : 'text-slate-500 hover:bg-slate-50'}`}>直播音訊監控</button>
-              <button onClick={() => setActiveTab('stream')} className={`px-6 py-4 text-sm font-bold whitespace-nowrap transition-all ${activeTab === 'stream' ? 'border-b-4 border-blue-600 text-blue-600 bg-blue-50/50' : 'text-slate-500 hover:bg-slate-50'}`}>多路串流與錄影</button>
-            </>
-          )}
-        </div>
-
-        {/* Content Section */}
-        <div className="p-4 md:p-10 min-h-[600px] bg-white">
-          
-          {/* Lecture Content: Outline */}
-          {mainCategory === 'lecture' && activeTab === 'outline' && (
-            <div className="space-y-8 animate-in fade-in slide-in-from-top-4 duration-700">
-              <div className="bg-gradient-to-r from-amber-500 to-orange-600 p-8 rounded-3xl shadow-xl text-white">
-                <h2 className="text-3xl font-black mb-3">專題講義：沒有聽見，怎能相信？</h2>
-                <div className="flex flex-wrap gap-6 text-sm font-bold opacity-90">
-                  <span className="flex items-center gap-2 bg-white/20 px-3 py-1.5 rounded-full"><Clock size={18}/> 40 分鐘培訓課程</span>
-                  <span className="flex items-center gap-2 bg-white/20 px-3 py-1.5 rounded-full"><Users size={18}/> 對象：音控同工 / 數位福音天使</span>
-                  <span className="flex items-center gap-2 bg-white/20 px-3 py-1.5 rounded-full"><BookOpen size={18}/> 核心經文：羅馬書 10:14</span>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="bg-slate-50 rounded-2xl p-8 border border-slate-200">
-                  <h3 className="text-xl font-black text-slate-800 mb-6 flex items-center gap-3">
-                    <Clock className="text-amber-600" size={24}/> 時間分配表
-                  </h3>
-                  <div className="space-y-6 text-slate-800">
-                    <div className="relative pl-6 border-l-2 border-amber-200">
-                      <div className="absolute -left-2 top-0 w-4 h-4 rounded-full bg-amber-500 border-2 border-white"></div>
-                      <p className="font-black">00-05 min: 開場導論</p>
-                      <p className="text-sm text-slate-600 mt-1">「音控桌就是祭壇」——建立同工的使命感。</p>
-                    </div>
-                    <div className="relative pl-6 border-l-2 border-amber-200">
-                      <div className="absolute -left-2 top-0 w-4 h-4 rounded-full bg-amber-500 border-2 border-white"></div>
-                      <p className="font-black">05-20 min: TF1 聲音工藝</p>
-                      <p className="text-sm text-slate-600 mt-1">清晰度大於音量。練習 EQ 與 Gain 的黃金平衡。</p>
-                    </div>
-                    <div className="relative pl-6 border-l-2 border-amber-200">
-                      <div className="absolute -left-2 top-0 w-4 h-4 rounded-full bg-amber-500 border-2 border-white"></div>
-                      <p className="font-black">20-35 min: OBS 與視覺溝通</p>
-                      <p className="text-sm text-slate-600 mt-1">直播音畫同步、投影片播放與歌詞正確率。</p>
-                    </div>
-                    <div className="relative pl-6 border-l-2 border-amber-200">
-                      <div className="absolute -left-2 top-0 w-4 h-4 rounded-full bg-amber-500 border-2 border-white"></div>
-                      <p className="font-black">35-40 min: 音樂會展望</p>
-                      <p className="text-sm text-slate-600 mt-1">11/1 傳教百年音樂會：我們準備好了嗎？</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-6 text-slate-800">
-                  <div className="bg-indigo-600 text-white p-8 rounded-3xl shadow-lg transform hover:-rotate-1 transition-transform">
-                    <h3 className="text-xl font-black mb-4 flex items-center gap-3"><Heart size={24}/> 宣教使命</h3>
-                    <p className="text-lg font-medium leading-relaxed italic border-l-4 border-white/30 pl-4 py-2">
-                      「人未曾聽見祂，怎能信祂呢？沒有傳道的，怎能聽見呢？」
-                    </p>
-                    <p className="mt-6 text-sm opacity-90 leading-relaxed">
-                      我們不只是在操作機器。我們正在搭建「靈魂與真理」之間的橋樑。每一聲推桿的升起，都是為了讓福音飛翔。
-                    </p>
-                  </div>
-                  <div className="bg-amber-100 p-6 rounded-2xl border border-amber-200">
-                    <h4 className="font-black text-amber-900 mb-2 flex items-center gap-2 text-sm">
-                      <Info size={16}/> 講習建議
-                    </h4>
-                    <p className="text-xs text-amber-800 leading-relaxed">
-                      今日 4/18 講習重點：請所有學員現場對齊「紅三角形 ▲」預設位，並練習在 OBS 中監控 TF1 CH13 的訊號跳動。
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Philosophy Tab */}
-          {mainCategory === 'lecture' && activeTab === 'philosophy' && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in zoom-in-95 duration-500">
-              <div className="p-8 rounded-3xl bg-blue-50 border border-blue-100 text-center space-y-4">
-                <div className="bg-blue-600 text-white w-16 h-16 rounded-2xl flex items-center justify-center mx-auto shadow-lg"><Mic size={32}/></div>
-                <h4 className="text-xl font-black text-blue-900">聽見 Hearing</h4>
-                <p className="text-sm text-blue-700 leading-relaxed">消除雜訊、穩定頻率。讓講台上的每一句話都能清楚入耳。</p>
-              </div>
-              <div className="p-8 rounded-3xl bg-emerald-50 border border-emerald-100 text-center space-y-4">
-                <div className="bg-emerald-600 text-white w-16 h-16 rounded-2xl flex items-center justify-center mx-auto shadow-lg"><Heart size={32}/></div>
-                <h4 className="text-xl font-black text-emerald-900">相信 Believing</h4>
-                <p className="text-sm text-emerald-700 leading-relaxed">音畫同步、無礙領受。讓遠端的信徒感受到聖靈的同在。</p>
-              </div>
-              <div className="p-8 rounded-3xl bg-rose-50 border border-rose-100 text-center space-y-4">
-                <div className="bg-rose-600 text-white w-16 h-16 rounded-2xl flex items-center justify-center mx-auto shadow-lg"><Video size={32}/></div>
-                <h4 className="text-xl font-black text-rose-900">宣教 Mission</h4>
-                <p className="text-sm text-rose-700 leading-relaxed">突破空間、傳播福音。將大溪教會的祝福送往世界的角落。</p>
-              </div>
-            </div>
-          )}
-
-          {/* PPT Rules Tab */}
-          {mainCategory === 'lecture' && activeTab === 'ppt_rules' && (
-            <div className="space-y-6 animate-in fade-in duration-500 text-slate-800">
-              <div className="bg-orange-50 border-l-4 border-orange-500 p-6 rounded-r-3xl text-slate-800">
-                <h3 className="text-xl font-black text-orange-900 mb-2 flex items-center gap-2">
-                  <Presentation size={24}/> 投影片（PPT）投放規範
-                </h3>
-                <p className="text-sm text-orange-800">視覺訊息是會眾領受真理的第一道門戶，務必精準。</p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <h4 className="font-bold flex items-center gap-2"><Clock size={18} className="text-orange-500"/> 投放準則</h4>
-                  <div className="bg-white border rounded-2xl p-6 space-y-4 shadow-sm">
-                    <div className="flex gap-3">
-                      <CheckCircle2 className="text-emerald-500 shrink-0" size={20}/>
-                      <div>
-                        <p className="font-bold text-sm">0.5 秒同步準則</p>
-                        <p className="text-xs text-slate-500 mt-1">歌詞應在歌手開口前 0.5 秒出現。若主領切換段落，視線需緊跟講台，快速應變。</p>
-                      </div>
-                    </div>
-                    <div className="flex gap-3">
-                      <CheckCircle2 className="text-emerald-500 shrink-0" size={20}/>
-                      <div>
-                        <p className="font-bold text-sm">內容三次檢查</p>
-                        <p className="text-xs text-slate-500 mt-1">聚會前需確認：1. 錯字 2. 字體大小（後排需看清）3. 影片是否有聲音。</p>
-                      </div>
-                    </div>
-                    <div className="flex gap-3">
-                      <CheckCircle2 className="text-emerald-500 shrink-0" size={20}/>
-                      <div>
-                        <p className="font-bold text-sm">轉場平滑化</p>
-                        <p className="text-xs text-slate-500 mt-1">嚴禁在直播畫面上出現「滑鼠移動」或「資料夾視窗」。使用 OBS 的「視窗擷取」可避免此問題。</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <h4 className="font-bold flex items-center gap-2"><Monitor size={18} className="text-orange-500"/> 技術操作建議</h4>
-                  <div className="bg-slate-900 text-white rounded-2xl p-6 space-y-4 shadow-lg text-slate-200">
-                    <div className="p-3 bg-white/10 rounded-xl">
-                      <p className="text-xs font-bold text-orange-400">雙螢幕模式 (Presenter Mode)</p>
-                      <p className="text-[11px] mt-1 opacity-80">確保筆電設定為「延伸螢幕」，OBS 僅擷取第二螢幕。主控者可同時看備忘稿。</p>
-                    </div>
-                    <div className="p-3 bg-white/10 rounded-xl">
-                      <p className="text-xs font-bold text-orange-400">緊急黑畫面處理</p>
-                      <p className="text-[11px] mt-1 opacity-80">若 PPT 閃退，第一時間切換 OBS 場景至「主攝影機全景」，待修復後再切回。</p>
-                    </div>
-                    <div className="p-3 bg-white/10 rounded-xl border border-orange-500/30">
-                      <p className="text-xs font-bold text-orange-400">比例適配</p>
-                      <p className="text-[11px] mt-1 opacity-80">音樂會 PPT 建議統一使用 16:9 比例，避免 OBS 畫面出現兩側黑邊。</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Practical Tab */}
-          {mainCategory === 'lecture' && activeTab === 'practical' && (
-            <div className="space-y-6 animate-in slide-in-from-bottom-6 duration-500">
-              <div className="bg-slate-900 text-white p-8 rounded-3xl shadow-xl">
-                <h3 className="text-xl font-black mb-6 flex items-center gap-3">
-                  <Settings className="text-blue-400" /> 音控實務三大核心重點
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-slate-200">
-                  <div className="space-y-6">
-                    <div className="group">
-                      <p className="font-black text-blue-400 mb-2">1. 人聲清晰度 (TF1 CH1-4)</p>
-                      <p className="text-sm opacity-80 leading-relaxed">使用 1-Knob EQ 控制。低音太重會混濁，高音太尖會刺耳。目標是：讓真理的聲音厚實且字句分明。</p>
-                    </div>
-                    <div className="group border-t border-white/10 pt-4">
-                      <p className="font-black text-emerald-400 mb-2">2. 直播穩定度 (OBS & CH13)</p>
-                      <p className="text-sm opacity-80 leading-relaxed">CH13 是送給全世界的聲音。嚴禁隨意更動 CH13 的 EQ，只需監控 OBS 的音量橫條是否在黃色區間。</p>
-                    </div>
-                  </div>
-                  <div className="space-y-6">
-                    <div className="group">
-                      <p className="font-black text-amber-400 mb-2">3. 投影片同步投放 (Visuals)</p>
-                      <p className="text-sm opacity-80 leading-relaxed">內容必須與領會者節奏完全同步。練習在 OBS 中使用「顯示器擷取」或「視窗擷取」來平滑切換 PPT 頁面。</p>
-                    </div>
-                    <div className="group border-t border-white/10 pt-4">
-                      <p className="font-black text-rose-400 mb-2">4. 備援應變 (Emergency)</p>
-                      <p className="text-sm opacity-80 leading-relaxed">當主領麥突然斷音時，5 秒內完成：1. 拉下故障軌, 2. 上推預備軌 (CH11), 3. 手勢導向預備麥。</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-slate-50 p-6 rounded-2xl border text-center italic text-slate-500 text-sm">
-                「音控人員不只是按按鈕的人，而是讓福音飛翔的人。」
-              </div>
-            </div>
-          )}
-
-          {/* TF1 Layout Tab */}
-          {mainCategory === 'tf1' && activeTab === 'layout' && (
-            <div className="space-y-8 animate-in fade-in duration-500 text-slate-800">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="border-2 border-slate-100 rounded-3xl p-8 bg-slate-50/50 shadow-sm text-slate-800">
-                  <h3 className="font-black text-xl mb-6 text-indigo-900 border-b pb-4">硬體主要區域</h3>
-                  <div className="space-y-5">
-                    <div className="flex gap-4">
-                      <span className="bg-indigo-600 text-white w-7 h-7 rounded-full flex items-center justify-center font-bold text-sm shrink-0 shadow-md">1</span>
-                      <div>
-                        <p className="font-black">彩色觸控大螢幕</p>
-                        <p className="text-xs text-slate-500 mt-1 leading-relaxed">核心操作區，包含單旋鈕控制 (Touch and Turn) 與 GainFinder 視覺增益輔助。</p>
-                      </div>
-                    </div>
-                    <div className="flex gap-4">
-                      <span className="bg-indigo-600 text-white w-7 h-7 rounded-full flex items-center justify-center font-bold text-sm shrink-0 shadow-md">2</span>
-                      <div>
-                        <p className="font-black">Fader Bank (分層推桿)</p>
-                        <p className="text-xs text-slate-500 mt-1 leading-relaxed">目前教會預設為 [INPUT 1-16]。音樂會時視需求切換至 [INPUT 17-32] 或 [GROUP]。</p>
-                      </div>
-                    </div>
-                    <div className="flex gap-4">
-                      <span className="bg-indigo-600 text-white w-7 h-7 rounded-full flex items-center justify-center font-bold text-sm shrink-0 shadow-md">3</span>
-                      <div>
-                        <p className="font-black">Stereo Master 紅標推桿</p>
-                        <p className="text-xs text-slate-500 mt-1 leading-relaxed">控制現場大堂擴音總音量。聚會期間應對準紅三角形 ▲ 位置。</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="bg-indigo-900 text-white rounded-3xl p-8 relative overflow-hidden shadow-2xl flex flex-col justify-center">
-                  <div className="relative z-10">
-                    <h3 className="font-black text-xl mb-6 flex items-center gap-2">面板關鍵標籤 <ShieldAlert size={20} className="text-amber-400" /></h3>
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-center p-3 bg-white/10 rounded-xl border border-white/20">
-                        <span className="text-sm font-bold">錄音輸出 (CH 13)</span>
-                        <span className="text-[10px] bg-rose-600 px-2 py-0.5 rounded-full uppercase font-black">嚴禁更動</span>
-                      </div>
-                      <div className="flex justify-between items-center p-3 bg-white/10 rounded-xl border border-white/20">
-                        <span className="text-sm font-bold">預備麥克風 (CH 11)</span>
-                        <span className="text-[10px] bg-emerald-500 px-2 py-0.5 rounded-full uppercase font-black">隨時待命</span>
-                      </div>
-                      <div className="flex justify-between items-center p-3 bg-white/10 rounded-xl border border-white/20">
-                        <span className="text-sm font-bold">電腦音 (CH 1)</span>
-                        <span className="text-[10px] bg-blue-500 px-2 py-0.5 rounded-full uppercase font-black">主領/翻譯</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* TF1 Channels Tab */}
-          {mainCategory === 'tf1' && activeTab === 'channels' && (
-            <div className="animate-in slide-in-from-bottom-8 duration-500 text-slate-800">
-              <div className="overflow-x-auto rounded-3xl border border-slate-200 shadow-sm">
-                <table className="w-full text-left">
-                  <thead className="bg-slate-50 border-b text-slate-500">
-                    <tr>
-                      <th className="p-4 font-bold text-sm">軌道</th>
-                      <th className="p-4 font-bold text-sm">實體標籤名稱</th>
-                      <th className="p-4 font-bold text-sm">輸入類型</th>
-                      <th className="p-4 font-bold text-sm">備註</th>
-                    </tr>
-                  </thead>
-                  <tbody className="text-sm">
-                    {channelMap.map((item, idx) => (
-                      <tr key={idx} className={`border-b hover:bg-slate-50 transition-colors ${item.color}`}>
-                        <td className="p-4 font-mono font-black text-slate-700">{item.ch}</td>
-                        <td className="p-4 font-black text-slate-900">{item.name}</td>
-                        <td className="p-4 text-xs font-medium text-slate-600">{item.type}</td>
-                        <td className="p-4 text-[10px] text-slate-400 italic">
-                          {item.ch === 13 ? "直連 OBS 直播主機進音" : item.ch === "Stereo" ? "大堂主音量推桿" : "聚會前需確認 Gain Finder 燈號"}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {/* TF1 SOP Tab */}
-          {mainCategory === 'tf1' && activeTab === 'sop' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-in zoom-in-95 duration-500 text-slate-800">
-              <div className="bg-emerald-50 border-2 border-emerald-100 rounded-3xl p-8 space-y-4">
-                <h4 className="text-xl font-black text-emerald-900 flex items-center gap-2"><Power className="text-emerald-600"/> 開機：先訊號後動力</h4>
-                <div className="space-y-4 text-sm text-emerald-800">
-                  <div className="p-4 bg-white rounded-2xl shadow-sm border border-emerald-100">
-                    <p className="font-bold">1. TF1 混音機電源</p>
-                    <p className="text-xs opacity-70">等待系統啟動完成 (約 40s)，載入場景。</p>
-                  </div>
-                  <div className="p-4 bg-white rounded-2xl shadow-sm border border-emerald-100">
-                    <p className="font-bold">2. 無線麥克風接收器</p>
-                    <p className="text-xs opacity-70">開啟電源並檢查電池電量。</p>
-                  </div>
-                  <div className="p-4 bg-white rounded-2xl shadow-sm border border-emerald-100 font-black ring-2 ring-emerald-500 ring-offset-2">
-                    <p>3. 最後：後櫃「開閉」喇叭開關</p>
-                    <p className="text-xs font-medium mt-1">此步驟為開啟擴音系統動力。</p>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-rose-50 border-2 border-rose-100 rounded-3xl p-8 space-y-4">
-                <h4 className="text-xl font-black text-rose-900 flex items-center gap-2"><Power className="text-rose-600"/> 關機：先動力後訊號</h4>
-                <div className="space-y-4 text-sm text-rose-800">
-                  <div className="p-4 bg-white rounded-2xl shadow-sm border border-rose-100 font-black ring-2 ring-rose-500 ring-offset-2">
-                    <p>1. 最先：後櫃喇叭開關</p>
-                    <p className="text-xs font-medium mt-1">防止關機電流脈衝損壞喇叭。</p>
-                  </div>
-                  <div className="p-4 bg-white rounded-2xl shadow-sm border border-rose-100">
-                    <p className="font-bold">2. 關閉 TF1 電源</p>
-                    <p className="text-xs opacity-70">確保所有電動推桿已回到最低位。</p>
-                  </div>
-                  <div className="p-4 bg-white rounded-2xl shadow-sm border border-rose-100">
-                    <p className="font-bold">3. 整理設備</p>
-                    <p className="text-xs opacity-70">關閉麥克風，若超過三天不聚會請取出電池。</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* OBS Content (Interface) */}
-          {mainCategory === 'obs' && activeTab === 'interface' && (
-            <div className="space-y-8 animate-in fade-in duration-500 text-slate-800">
-              <div className="bg-blue-600 text-white p-6 rounded-3xl flex items-center justify-between shadow-lg">
-                <div className="flex items-center gap-4">
-                  <Monitor size={32} />
-                  <div>
-                    <h3 className="font-black text-lg tracking-tight">目前場景：一般聚會</h3>
-                    <p className="text-xs opacity-80">工作室模式 (Studio Mode) 運作中</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs font-mono font-bold tracking-widest bg-white/20 px-3 py-1 rounded-full border border-white/30 text-white">LIVE OUTPUT</p>
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-4">
-                  <h4 className="font-black flex items-center gap-2"><List size={18} className="text-blue-600" /> 來源清單說明</h4>
-                  <div className="grid grid-cols-1 gap-3">
-                    {obsSources.map((source, idx) => (
-                      <div key={idx} className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border hover:border-blue-400 transition-all group">
-                        <div className="bg-white p-2.5 rounded-xl shadow-sm text-blue-600 group-hover:scale-110 transition-transform">{source.icon}</div>
-                        <div>
-                          <p className="text-sm font-black">{source.name}</p>
-                          <p className="text-[11px] text-slate-500 mt-0.5">{source.desc}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <div className="space-y-6">
-                  <div className="p-6 bg-slate-900 rounded-3xl text-white shadow-xl border border-slate-700">
-                    <h4 className="font-black mb-4 text-slate-400 text-xs tracking-widest uppercase">控制控制面板</h4>
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/10">
-                        <span className="text-sm font-bold">開始串流</span>
-                        <span className="text-[10px] bg-emerald-600 px-3 py-1 rounded-full font-black shadow-sm">YouTube 串接</span>
-                      </div>
-                      <div className="flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/10">
-                        <span className="text-sm font-bold">開始錄製</span>
-                        <span className="text-[10px] bg-blue-600 px-3 py-1 rounded-full font-black shadow-sm">MKV 備份檔</span>
-                      </div>
-                      <div className="flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/10 opacity-50 text-slate-400">
-                        <span className="text-sm font-bold">虛擬攝像機</span>
-                        <span className="text-[10px] bg-slate-600 px-3 py-1 rounded-full font-black uppercase">Disabled</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="p-6 bg-amber-50 rounded-3xl border border-amber-200">
-                    <h4 className="font-black text-amber-900 mb-2 flex items-center gap-2 text-sm"><ShieldAlert size={18} className="text-amber-500"/> 資安守則</h4>
-                    <p className="text-xs text-amber-800 leading-relaxed">
-                      根據照片 IMG_2243，螢幕下方貼有 Wi-Fi 與設備帳密。<br/>
-                      <span className="font-black text-rose-600">嚴禁：</span> 直播攝影機拍攝到音控桌面。截圖發送手冊時務必手動遮蓋密碼區域。
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* OBS Content (Audio) */}
-          {mainCategory === 'obs' && activeTab === 'audio_obs' && (
-            <div className="space-y-10 animate-in slide-in-from-right-8 duration-500 text-slate-800">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                <div className="space-y-8">
-                  <div className="bg-slate-50 p-6 rounded-3xl border shadow-inner text-slate-800">
-                    <h4 className="font-black mb-6 flex items-center gap-2"><Volume2 size={20} className="text-blue-600"/> 混音器當前電量</h4>
-                    <div className="space-y-8">
-                      <div>
-                        <div className="flex justify-between mb-2">
-                          <span className="text-xs font-black">麥克風/輸入音效 1 (TF1 CH13)</span>
-                          <span className="text-xs font-mono text-emerald-600 font-bold">-0.4 dB</span>
-                        </div>
-                        <div className="h-6 bg-slate-200 rounded-full overflow-hidden flex shadow-inner">
-                          <div className="h-full bg-emerald-500 w-[80%]"></div>
-                          <div className="h-full bg-yellow-400 w-[12%]"></div>
-                          <div className="h-full bg-red-500 w-[8%] border-l border-white/20"></div>
-                        </div>
-                        <p className="text-[10px] text-slate-400 mt-2 leading-relaxed">目前接近 Peak 值。若主領唱歌聲較大，請在 TF1 適度調降 Gain。</p>
-                      </div>
-                      <div>
-                        <div className="flex justify-between mb-2">
-                          <span className="text-xs font-black">輸出音效 1 (電腦背景音)</span>
-                          <span className="text-xs font-mono text-blue-600 font-bold">-2.0 dB</span>
-                        </div>
-                        <div className="h-6 bg-slate-200 rounded-full overflow-hidden flex shadow-inner">
-                          <div className="h-full bg-blue-500 w-[70%]"></div>
-                        </div>
-                        <p className="text-[10px] text-slate-400 mt-2 leading-relaxed">對應播放影片或伴奏音樂之音量。</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="bg-gradient-to-br from-blue-700 to-indigo-900 text-white rounded-3xl p-8 flex flex-col justify-center shadow-2xl relative overflow-hidden">
-                   <div className="absolute top-0 right-0 p-4 opacity-10"><Volume2 size={120}/></div>
-                  <h4 className="text-2xl font-black mb-6 relative z-10 text-white">直播監聽準則</h4>
-                  <ul className="space-y-5 text-sm font-medium relative z-10 text-white">
-                    <li className="flex gap-3">
-                      <div className="w-6 h-6 rounded-full bg-emerald-400 shrink-0 border-2 border-white/30"></div>
-                      <span className="opacity-90 leading-relaxed text-white">指標維持在「綠色區塊」：安全訊號，音質最穩定。</span>
-                    </li>
-                    <li className="flex gap-3">
-                      <div className="w-6 h-6 rounded-full bg-yellow-400 shrink-0 border-2 border-white/30"></div>
-                      <span className="opacity-90 leading-relaxed text-white">尖峰跳動至「黃色區塊」：最理想直播音量，聽感最清晰。</span>
-                    </li>
-                    <li className="flex gap-3">
-                      <div className="w-6 h-6 rounded-full bg-red-500 shrink-0 border-2 border-white/30"></div>
-                      <span className="font-black text-yellow-300 leading-relaxed text-yellow-300">頻繁觸碰「紅色區塊」：<span className="underline">絕對禁止</span>。會導致破音。</span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* OBS Content (Stream) */}
-          {mainCategory === 'obs' && activeTab === 'stream' && (
-            <div className="space-y-8 animate-in fade-in duration-500 text-slate-800">
-              <div className="p-8 rounded-3xl border border-slate-200 bg-slate-50/50 shadow-sm text-slate-800">
-                <h3 className="text-xl font-black mb-6 flex items-center gap-2"><Radio className="text-rose-500" /> 直播與錄製配置</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="bg-white p-6 rounded-2xl border shadow-sm text-slate-800">
-                    <p className="text-xs font-black text-slate-400 mb-4 tracking-widest uppercase">YouTube Live Destination</p>
-                    <div className="flex items-center justify-between">
-                      <code className="text-xs text-blue-600 font-mono font-bold">daxi.presbyterian.live</code>
-                      <span className="text-[10px] bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full font-black uppercase">Linked</span>
-                    </div>
-                  </div>
-                  <div className="bg-white p-6 rounded-2xl border shadow-sm flex items-center justify-between text-slate-800">
-                    <div className="space-y-1">
-                      <p className="text-xs font-black text-slate-400 tracking-widest uppercase">Recording Status</p>
-                      <p className="font-mono text-sm font-bold text-slate-700">60 FPS / CBR 4500</p>
-                    </div>
-                    <div className="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center animate-pulse shadow-lg shadow-emerald-200">
-                      <Video size={20} className="text-white"/>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-        </div>
-
-        {/* Footer */}
-        <div className="bg-slate-900 p-6 flex flex-col md:flex-row justify-between items-center gap-4 text-white border-t border-slate-700">
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2 text-[10px] text-slate-400 font-mono tracking-widest font-black uppercase">
-              <span className="w-2 h-2 bg-emerald-500 rounded-full animate-ping"></span>
-              Core System Online
-            </div>
-            <a 
-              href="https://tjcdaxiinformation.github.io/YAMAHA-TF1/" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 transition-colors font-black border-b border-blue-400/30 pb-0.5"
-            >
-              <ExternalLink size={14}/> 官方 WEB 手冊
-            </a>
-          </div>
-          <p className="text-[10px] text-slate-500 font-bold tracking-tight">
-            © 2026 TJC大溪教會資訊股音控人員操作手冊
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default App;
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2487.7">
+  <style type="text/css">
+    body {background-color: #0c0f17}
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Menlo; color: #4689cc; -webkit-text-stroke: #4689cc}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Menlo; color: #c27e65; -webkit-text-stroke: #c27e65}
+    p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Menlo; color: #8cd3fe; -webkit-text-stroke: #8cd3fe}
+    p.p4 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Menlo; color: #cacaca; -webkit-text-stroke: #cacaca}
+    p.p5 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Menlo; color: #6d7378; -webkit-text-stroke: #6d7378}
+    p.p6 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Menlo; color: #71c083; -webkit-text-stroke: #71c083}
+    p.p7 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Menlo; color: #cacaca; -webkit-text-stroke: #cacaca; min-height: 16.0px}
+    span.s1 {font-kerning: none; background-color: #171818}
+    span.s2 {font-kerning: none; color: #8cd3fe; background-color: #171818; -webkit-text-stroke: 0px #8cd3fe}
+    span.s3 {font-kerning: none; color: #6d6d6d; background-color: #171818; -webkit-text-stroke: 0px #6d6d6d}
+    span.s4 {font-kerning: none; color: #4689cc; background-color: #171818; -webkit-text-stroke: 0px #4689cc}
+    span.s5 {font-kerning: none; color: #cacaca; background-color: #171818; -webkit-text-stroke: 0px #cacaca}
+    span.s6 {font-kerning: none; color: #c27e65; background-color: #171818; -webkit-text-stroke: 0px #c27e65}
+    span.s7 {font-kerning: none; color: #b76ff7; background-color: #171818; -webkit-text-stroke: 0px #b76ff7}
+    span.s8 {font-kerning: none; color: #d4d4d4; background-color: #171818; -webkit-text-stroke: 0px #d4d4d4}
+    span.s9 {font-kerning: none}
+  </style>
+</head>
+<body>
+<p class="p1"><span class="s1">&lt;!DOCTYPE</span><span class="s2"> html</span><span class="s1">&gt;</span></p>
+<p class="p2"><span class="s3">&lt;</span><span class="s4">html</span><span class="s5"> </span><span class="s2">lang</span><span class="s3">=</span><span class="s1">"zh-TW"</span><span class="s3">&gt;</span></p>
+<p class="p1"><span class="s3">&lt;</span><span class="s1">head</span><span class="s3">&gt;</span></p>
+<p class="p3"><span class="s5"><span class="Apple-converted-space">    </span></span><span class="s3">&lt;</span><span class="s4">meta</span><span class="s5"> </span><span class="s1">charset</span><span class="s3">=</span><span class="s6">"UTF-8"</span><span class="s3">&gt;</span></p>
+<p class="p2"><span class="s5"><span class="Apple-converted-space">    </span></span><span class="s3">&lt;</span><span class="s4">meta</span><span class="s5"> </span><span class="s2">name</span><span class="s3">=</span><span class="s1">"viewport"</span><span class="s5"> </span><span class="s2">content</span><span class="s3">=</span><span class="s1">"width=device-width, initial-scale=1.0"</span><span class="s3">&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">    </span></span><span class="s3">&lt;</span><span class="s4">title</span><span class="s3">&gt;</span><span class="s1">TJC大溪教會資訊股音控人員操作手冊</span><span class="s3">&lt;/</span><span class="s4">title</span><span class="s3">&gt;</span></p>
+<p class="p5"><span class="s5"><span class="Apple-converted-space">    </span></span><span class="s1">&lt;!-- Tailwind CSS CDN --&gt;</span></p>
+<p class="p2"><span class="s5"><span class="Apple-converted-space">    </span></span><span class="s3">&lt;</span><span class="s4">script</span><span class="s5"> </span><span class="s2">src</span><span class="s3">=</span><span class="s1">"https://cdn.tailwindcss.com"</span><span class="s3">&gt;&lt;/</span><span class="s4">script</span><span class="s3">&gt;</span></p>
+<p class="p5"><span class="s5"><span class="Apple-converted-space">    </span></span><span class="s1">&lt;!-- React &amp; Babel CDN (用於在瀏覽器直接執行 JSX) --&gt;</span></p>
+<p class="p2"><span class="s5"><span class="Apple-converted-space">    </span></span><span class="s3">&lt;</span><span class="s4">script</span><span class="s5"> </span><span class="s2">src</span><span class="s3">=</span><span class="s1">"https://unpkg.com/react@18/umd/react.production.min.js"</span><span class="s3">&gt;&lt;/</span><span class="s4">script</span><span class="s3">&gt;</span></p>
+<p class="p2"><span class="s5"><span class="Apple-converted-space">    </span></span><span class="s3">&lt;</span><span class="s4">script</span><span class="s5"> </span><span class="s2">src</span><span class="s3">=</span><span class="s1">"https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"</span><span class="s3">&gt;&lt;/</span><span class="s4">script</span><span class="s3">&gt;</span></p>
+<p class="p2"><span class="s5"><span class="Apple-converted-space">    </span></span><span class="s3">&lt;</span><span class="s4">script</span><span class="s5"> </span><span class="s2">src</span><span class="s3">=</span><span class="s1">"https://unpkg.com/@babel/standalone/babel.min.js"</span><span class="s3">&gt;&lt;/</span><span class="s4">script</span><span class="s3">&gt;</span></p>
+<p class="p5"><span class="s5"><span class="Apple-converted-space">    </span></span><span class="s1">&lt;!-- Lucide Icons CDN --&gt;</span></p>
+<p class="p2"><span class="s5"><span class="Apple-converted-space">    </span></span><span class="s3">&lt;</span><span class="s4">script</span><span class="s5"> </span><span class="s2">src</span><span class="s3">=</span><span class="s1">"https://unpkg.com/lucide@latest"</span><span class="s3">&gt;&lt;/</span><span class="s4">script</span><span class="s3">&gt;</span></p>
+<p class="p1"><span class="s5"><span class="Apple-converted-space">    </span></span><span class="s3">&lt;</span><span class="s1">style</span><span class="s3">&gt;</span></p>
+<p class="p6"><span class="s5"><span class="Apple-converted-space">        </span></span><span class="s7">@import</span><span class="s5"> </span><span class="s6">url</span><span class="s8">(</span><span class="s1">'https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&amp;display=swap'</span><span class="s8">);</span></p>
+<p class="p6"><span class="s5"><span class="Apple-converted-space">        </span></span><span class="s4">body</span><span class="s5"> </span><span class="s8">{</span><span class="s5"> </span><span class="s2">font-family:</span><span class="s5"> </span><span class="s1">'Noto Sans TC'</span><span class="s8">,</span><span class="s5"> </span><span class="s6">sans-serif</span><span class="s8">;</span><span class="s5"> </span><span class="s8">}</span></p>
+<p class="p1"><span class="s5"><span class="Apple-converted-space">        </span></span><span class="s1">.scrollbar-hide::-webkit-scrollbar</span><span class="s5"> </span><span class="s8">{</span><span class="s5"> </span><span class="s2">display:</span><span class="s5"> </span><span class="s6">none</span><span class="s8">;</span><span class="s5"> </span><span class="s8">}</span></p>
+<p class="p1"><span class="s5"><span class="Apple-converted-space">    </span></span><span class="s3">&lt;/</span><span class="s1">style</span><span class="s3">&gt;</span></p>
+<p class="p1"><span class="s3">&lt;/</span><span class="s1">head</span><span class="s3">&gt;</span></p>
+<p class="p2"><span class="s3">&lt;</span><span class="s4">body</span><span class="s5"> </span><span class="s2">class</span><span class="s3">=</span><span class="s1">"bg-slate-50"</span><span class="s3">&gt;</span></p>
+<p class="p2"><span class="s5"><span class="Apple-converted-space">    </span></span><span class="s3">&lt;</span><span class="s4">div</span><span class="s5"> </span><span class="s2">id</span><span class="s3">=</span><span class="s1">"root"</span><span class="s3">&gt;&lt;/</span><span class="s4">div</span><span class="s3">&gt;</span></p>
+<p class="p7"><span class="s9"></span><br></p>
+<p class="p2"><span class="s5"><span class="Apple-converted-space">    </span></span><span class="s3">&lt;</span><span class="s4">script</span><span class="s5"> </span><span class="s2">type</span><span class="s3">=</span><span class="s1">"text/babel"</span><span class="s3">&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">        </span>const { useState, useEffect } = React;</span></p>
+<p class="p7"><span class="s1"><span class="Apple-converted-space">        </span></span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">        </span>// 模擬 Lucide Icons (因為在 HTML CDN 環境中使用方式不同)</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">        </span>const Icon = ({ name, size = 20, className = "" }) =&gt; {</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">            </span>useEffect(() =&gt; {</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                </span>if (window.lucide) {</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                    </span>window.lucide.createIcons();</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                </span>}</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">            </span>}, [name]);</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">            </span>return &lt;i data-lucide={name} style={{ width: size, height: size }} className={className}&gt;&lt;/i&gt;;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">        </span>};</span></p>
+<p class="p7"><span class="s9"></span><br></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">        </span>const App = () =&gt; {</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">            </span>const [mainCategory, setMainCategory] = useState('lecture');</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">            </span>const [activeTab, setActiveTab] = useState('outline');</span></p>
+<p class="p7"><span class="s9"></span><br></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">            </span>const channelMap = [</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                </span>{ ch: 1, name: "電腦音 / 主領翻譯", type: "Input", color: "bg-blue-100" },</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                </span>{ ch: 2, name: "一、領唱", type: "Mic", color: "bg-green-100" },</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                </span>{ ch: 3, name: "二、領唱", type: "Mic", color: "bg-green-100" },</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                </span>{ ch: 4, name: "三、領唱", type: "Mic", color: "bg-green-100" },</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                </span>{ ch: "5-8", name: "無線麥克風", type: "Mic", color: "bg-green-50" },</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                </span>{ ch: 9, name: "詩班收音", type: "Mic", color: "bg-yellow-100" },</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                </span>{ ch: 10, name: "鋼琴", type: "Inst", color: "bg-yellow-100" },</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                </span>{ ch: 11, name: "預備麥克風", type: "Mic", color: "bg-gray-100" },</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                </span>{ ch: 13, name: "錄音輸出 (勿動)", type: "Output", color: "bg-red-100" },</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                </span>{ ch: "ST IN", name: "講台音源", type: "Input", color: "bg-orange-100" },</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                </span>{ ch: "Stereo", name: "總音量", type: "Master", color: "bg-red-200" }</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">            </span>];</span></p>
+<p class="p7"><span class="s9"></span><br></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">            </span>const obsSources = [</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                </span>{ name: "投影片放映", icon: "presentation", desc: "播放 PPT 或 Keynote 投影片" },</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                </span>{ name: "詩告", icon: "list", desc: "顯示歌詞、詩歌內容" },</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                </span>{ name: "教會投影系統", icon: "monitor", desc: "擷取現場投影機送出的畫面" },</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                </span>{ name: "視頻擷取裝置", icon: "video", desc: "主攝影機/導播機畫面" },</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                </span>{ name: "麥克風/輸入音效 1", icon: "mic", desc: "來自 TF1 CH13 的專業訊號" },</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                </span>{ name: "顯示器擷取", icon: "monitor", desc: "備用桌面/臨時資訊顯示" }</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">            </span>];</span></p>
+<p class="p7"><span class="s9"></span><br></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">            </span>return (</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div className="min-h-screen p-2 md:p-6"&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div className="max-w-6xl mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-200"&gt;</span></p>
+<p class="p7"><span class="s1"><span class="Apple-converted-space">                        </span></span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                        </span>{/* Header */}</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div className="bg-slate-900 text-white p-5 flex flex-wrap justify-between items-center"&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;div className="flex items-center gap-4"&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;div className="bg-blue-600 p-2.5 rounded-xl"&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;Icon name="radio" size={28} /&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;/div&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;div&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;h1 className="text-2xl font-black tracking-tighter"&gt;大溪教會直播音控數位手冊&lt;/h1&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;div className="flex items-center gap-2 mt-1"&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;span className="bg-emerald-500/20 text-emerald-400 text-[10px] px-2 py-0.5 rounded-full font-bold border border-emerald-500/30"&gt;數位福音天使團隊&lt;/span&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;span className="text-slate-500 text-[10px] font-mono uppercase"&gt;Version 2026.4.18&lt;/span&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;/div&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;/div&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;/div&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;div className="flex bg-slate-800 p-1.5 rounded-2xl mt-4 md:mt-0 gap-1"&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;button onClick={() =&gt; {setMainCategory('lecture'); setActiveTab('outline');}} className={`px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 ${mainCategory === 'lecture' ? 'bg-amber-600 text-white' : 'text-slate-400'}`}&gt;&lt;Icon name="book-open" size={16}/&gt; 專題講義&lt;/button&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;button onClick={() =&gt; {setMainCategory('obs'); setActiveTab('interface');}} className={`px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 ${mainCategory === 'obs' ? 'bg-blue-600 text-white' : 'text-slate-400'}`}&gt;&lt;Icon name="video" size={16}/&gt; OBS 29.1.3&lt;/button&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;button onClick={() =&gt; {setMainCategory('tf1'); setActiveTab('layout');}} className={`px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 ${mainCategory === 'tf1' ? 'bg-indigo-600 text-white' : 'text-slate-400'}`}&gt;&lt;Icon name="settings" size={16}/&gt; YAMAHA TF1&lt;/button&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;/div&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</span></p>
+<p class="p7"><span class="s9"></span><br></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                        </span>{/* Tabs */}</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div className="flex border-b bg-white overflow-x-auto scrollbar-hide"&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                            </span>{mainCategory === 'lecture' &amp;&amp; (</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;button onClick={() =&gt; setActiveTab('outline')} className={`px-6 py-4 text-sm font-bold whitespace-nowrap ${activeTab === 'outline' ? 'border-b-4 border-amber-600 text-amber-600' : 'text-slate-500'}`}&gt;課程大綱&lt;/button&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;button onClick={() =&gt; setActiveTab('philosophy')} className={`px-6 py-4 text-sm font-bold whitespace-nowrap ${activeTab === 'philosophy' ? 'border-b-4 border-amber-600 text-amber-600' : 'text-slate-500'}`}&gt;使命與精神&lt;/button&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;button onClick={() =&gt; setActiveTab('ppt_rules')} className={`px-6 py-4 text-sm font-bold whitespace-nowrap ${activeTab === 'ppt_rules' ? 'border-b-4 border-amber-600 text-amber-600' : 'text-slate-500'}`}&gt;投影片規範&lt;/button&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;/&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                            </span>)}</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                            </span>{mainCategory === 'tf1' &amp;&amp; (</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;button onClick={() =&gt; setActiveTab('layout')} className={`px-6 py-4 text-sm font-bold whitespace-nowrap ${activeTab === 'layout' ? 'border-b-4 border-indigo-600 text-indigo-600' : 'text-slate-500'}`}&gt;面板功能佈局&lt;/button&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;button onClick={() =&gt; setActiveTab('channels')} className={`px-6 py-4 text-sm font-bold whitespace-nowrap ${activeTab === 'channels' ? 'border-b-4 border-indigo-600 text-indigo-600' : 'text-slate-500'}`}&gt;頻道標籤對照&lt;/button&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;button onClick={() =&gt; setActiveTab('sop')} className={`px-6 py-4 text-sm font-bold whitespace-nowrap ${activeTab === 'sop' ? 'border-b-4 border-indigo-600 text-indigo-600' : 'text-slate-500'}`}&gt;開關機 SOP&lt;/button&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;/&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                            </span>)}</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                            </span>{mainCategory === 'obs' &amp;&amp; (</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;button onClick={() =&gt; setActiveTab('interface')} className={`px-6 py-4 text-sm font-bold whitespace-nowrap ${activeTab === 'interface' ? 'border-b-4 border-blue-600 text-blue-600' : 'text-slate-500'}`}&gt;介面與來源&lt;/button&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;button onClick={() =&gt; setActiveTab('audio_obs')} className={`px-6 py-4 text-sm font-bold whitespace-nowrap ${activeTab === 'audio_obs' ? 'border-b-4 border-blue-600 text-blue-600' : 'text-slate-500'}`}&gt;直播音訊監控&lt;/button&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;/&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                            </span>)}</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</span></p>
+<p class="p7"><span class="s9"></span><br></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                        </span>{/* Content */}</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div className="p-4 md:p-10 min-h-[500px]"&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                            </span>{mainCategory === 'lecture' &amp;&amp; activeTab === 'outline' &amp;&amp; (</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;div className="space-y-6"&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;div className="bg-amber-500 p-8 rounded-3xl text-white"&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;h2 className="text-3xl font-black mb-2"&gt;專題講義：沒有聽見，怎能相信？&lt;/h2&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;p className="opacity-90"&gt;羅馬書 10:14 | 40 分鐘培訓課程&lt;/p&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;/div&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;div className="grid grid-cols-1 md:grid-cols-2 gap-6"&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;div className="bg-slate-50 p-6 rounded-2xl border"&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                            </span>&lt;h3 className="font-bold text-lg mb-4 flex items-center gap-2 text-slate-800"&gt;&lt;Icon name="clock" className="text-amber-600" /&gt; 時間分配&lt;/h3&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                            </span>&lt;div className="space-y-4 text-slate-700"&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                                </span>&lt;p&gt;&lt;b&gt;00-05m:&lt;/b&gt; 開場導論 - 建立服事榮譽感&lt;/p&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                                </span>&lt;p&gt;&lt;b&gt;05-20m:&lt;/b&gt; TF1 實務 - 清晰度大於音量&lt;/p&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                                </span>&lt;p&gt;&lt;b&gt;20-35m:&lt;/b&gt; OBS 實務 - 直播訊息傳遞準確性&lt;/p&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                                </span>&lt;p&gt;&lt;b&gt;35-40m:&lt;/b&gt; 結語 - 11/1 百周年音樂會展望&lt;/p&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                            </span>&lt;/div&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;/div&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;div className="bg-indigo-600 p-6 rounded-2xl text-white"&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                            </span>&lt;h3 className="font-bold mb-4 flex items-center gap-2"&gt;&lt;Icon name="heart" /&gt; 宣教宣言&lt;/h3&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                            </span>&lt;p className="italic"&gt;「人未曾聽見祂，怎能信祂呢？沒有傳道的，怎能聽見呢？」&lt;/p&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                            </span>&lt;p className="mt-4 text-sm opacity-80"&gt;每一聲推桿，都是為了讓福音飛翔。&lt;/p&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;/div&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;/div&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;/div&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                            </span>)}</span></p>
+<p class="p7"><span class="s9"></span><br></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                            </span>{mainCategory === 'lecture' &amp;&amp; activeTab === 'ppt_rules' &amp;&amp; (</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;div className="space-y-6"&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;div className="bg-orange-50 border-l-4 border-orange-500 p-6 rounded-r-3xl text-orange-900"&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;h3 className="text-xl font-bold mb-2"&gt;投影片 (PPT) 投放規範&lt;/h3&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;p className="text-sm"&gt;視覺訊息是第一道門戶，務必精準同步。&lt;/p&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;/div&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-slate-800"&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;div className="bg-white border p-6 rounded-2xl space-y-4"&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                            </span>&lt;p className="font-bold flex items-center gap-2"&gt;&lt;Icon name="check-circle-2" className="text-emerald-500" /&gt; 0.5 秒同步準則&lt;/p&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                            </span>&lt;p className="text-sm text-slate-500"&gt;歌詞應在歌手開口前出現。視線緊跟講台，隨時應變。&lt;/p&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                            </span>&lt;p className="font-bold flex items-center gap-2"&gt;&lt;Icon name="check-circle-2" className="text-emerald-500" /&gt; 轉場平滑化&lt;/p&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                            </span>&lt;p className="text-sm text-slate-500"&gt;嚴禁在畫面上移動滑鼠。建議使用 OBS 視窗擷取。&lt;/p&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;/div&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;div className="bg-slate-900 p-6 rounded-2xl text-white space-y-3"&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                            </span>&lt;p className="text-orange-400 font-bold"&gt;緊急狀況處理&lt;/p&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                            </span>&lt;p className="text-xs"&gt;PPT 閃退時：切換 OBS 場景至全景 -&gt; 重開 PPT -&gt; 切回畫面。&lt;/p&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;/div&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;/div&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;/div&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                            </span>)}</span></p>
+<p class="p7"><span class="s9"></span><br></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                            </span>{mainCategory === 'tf1' &amp;&amp; activeTab === 'channels' &amp;&amp; (</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;div className="overflow-x-auto border rounded-2xl text-slate-800"&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;table className="w-full text-left text-sm"&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;thead className="bg-slate-50 border-b"&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                            </span>&lt;tr&gt;&lt;th className="p-4"&gt;軌道&lt;/th&gt;&lt;th className="p-4"&gt;標籤名稱&lt;/th&gt;&lt;th className="p-4"&gt;輸入類型&lt;/th&gt;&lt;/tr&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;/thead&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;tbody&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                            </span>{channelMap.map((item, idx) =&gt; (</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                                </span>&lt;tr key={idx} className={`border-b ${item.color}`}&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                                    </span>&lt;td className="p-4 font-mono font-bold"&gt;{item.ch}&lt;/td&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                                    </span>&lt;td className="p-4 font-bold"&gt;{item.name}&lt;/td&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                                    </span>&lt;td className="p-4"&gt;{item.type}&lt;/td&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                                </span>&lt;/tr&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                            </span>))}</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;/tbody&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;/table&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;/div&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                            </span>)}</span></p>
+<p class="p7"><span class="s9"></span><br></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                            </span>{mainCategory === 'obs' &amp;&amp; activeTab === 'audio_obs' &amp;&amp; (</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;div className="grid grid-cols-1 md:grid-cols-2 gap-6"&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;div className="bg-slate-50 p-6 rounded-2xl border text-slate-800"&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;h4 className="font-bold mb-6"&gt;OBS 混音器 (Mixer)&lt;/h4&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;div className="space-y-6"&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                            </span>&lt;div&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                                </span>&lt;p className="text-xs font-bold mb-1"&gt;麥克風/輸入音效 1 (TF1 CH13)&lt;/p&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                                </span>&lt;div className="h-6 bg-slate-200 rounded-full overflow-hidden flex shadow-inner"&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                                    </span>&lt;div className="h-full bg-emerald-500 w-[80%]"&gt;&lt;/div&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                                    </span>&lt;div className="h-full bg-yellow-400 w-[12%]"&gt;&lt;/div&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                                    </span>&lt;div className="h-full bg-red-500 w-[8%]"&gt;&lt;/div&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                                </span>&lt;/div&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                            </span>&lt;/div&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;/div&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;/div&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;div className="bg-indigo-900 text-white p-8 rounded-3xl"&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;h4 className="text-xl font-bold mb-4"&gt;直播監聽準則&lt;/h4&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;ul className="space-y-4 text-sm"&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                            </span>&lt;li className="flex gap-2"&gt;&lt;div className="w-4 h-4 rounded-full bg-emerald-400"&gt;&lt;/div&gt; 綠色/黃色：理想音量&lt;/li&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                            </span>&lt;li className="flex gap-2"&gt;&lt;div className="w-4 h-4 rounded-full bg-red-500"&gt;&lt;/div&gt; 觸碰紅色：絕對禁止 (破音)&lt;/li&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;/ul&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;/div&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;/div&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                            </span>)}</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</span></p>
+<p class="p7"><span class="s9"></span><br></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                        </span>{/* Footer */}</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div className="bg-slate-900 p-6 flex justify-between items-center text-white border-t border-slate-700"&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;a href="https://tjcdaxiinformation.github.io/YAMAHA-TF1/" target="_blank" className="text-xs text-blue-400 flex items-center gap-1"&gt;&lt;Icon name="external-link" size={14}/&gt; 官方 WEB 手冊&lt;/a&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;p className="text-[10px] text-slate-500 font-bold tracking-tight"&gt;© 2026 TJC大溪教會資訊股音控人員操作手冊&lt;/p&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">            </span>);</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">        </span>};</span></p>
+<p class="p7"><span class="s9"></span><br></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">        </span>const root = ReactDOM.createRoot(document.getElementById('root'));</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">        </span>root.render(&lt;App /&gt;);</span></p>
+<p class="p1"><span class="s5"><span class="Apple-converted-space">    </span></span><span class="s3">&lt;/</span><span class="s1">script</span><span class="s3">&gt;</span></p>
+<p class="p1"><span class="s3">&lt;/</span><span class="s1">body</span><span class="s3">&gt;</span></p>
+<p class="p1"><span class="s3">&lt;/</span><span class="s1">html</span><span class="s3">&gt;</span></p>
+</body>
+</html>
