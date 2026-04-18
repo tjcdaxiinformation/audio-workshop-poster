@@ -121,7 +121,7 @@
                             <span>參加</span>
                         </button>
                     </div>
-                    <p id="error-msg" class="text-xs text-red-400 text-center hidden font-medium">請輸入姓名後再點擊參加</p>
+                    <p id="error-msg" class="text-xs text-red-400 text-center hidden font-medium"></p>
                 </div>
 
                 <!-- 已報名名單 -->
@@ -153,12 +153,6 @@
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        const firebaseConfig = JSON.parse(__firebase_config);
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'audio-workshop';
-
         const nameInput = document.getElementById('user-name');
         const joinBtn = document.getElementById('join-btn');
         const listContainer = document.getElementById('participant-list');
@@ -167,42 +161,63 @@
         const toast = document.getElementById('toast');
         const toastText = document.getElementById('toast-text');
 
+        let db, auth, appId;
         let currentUser = null;
         let existingNames = [];
 
-        // 初始化認證
-        const initAuth = async () => {
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
+        // 初始化 Firebase (加入錯誤捕捉)
+        try {
+            const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+            const app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            appId = typeof __app_id !== 'undefined' ? __app_id : 'audio-workshop';
+            
+            // 立即執行認證程序 (Rule 3)
+            const initAuth = async () => {
+                try {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                } catch (err) {
+                    console.error("Authentication failed:", err);
+                    showError("連線認證失敗，請檢查網路。");
                 }
-            } catch (err) {
-                console.error("Auth Error:", err);
-            }
-        };
+            };
 
-        onAuthStateChanged(auth, (user) => {
-            currentUser = user;
-            if (user) {
-                const participantsCol = collection(db, 'artifacts', appId, 'public', 'data', 'participants');
-                onSnapshot(participantsCol, (snapshot) => {
-                    const names = [];
-                    snapshot.forEach(doc => {
-                        if (doc.data().name) names.push(doc.data().name);
-                    });
-                    existingNames = names;
-                    names.sort();
-                    updateUI(names);
-                }, (error) => {
-                    console.error("Firestore Error:", error);
-                    listContainer.innerHTML = '<p class="text-red-400 text-xs">載入名單失敗</p>';
+            initAuth();
+
+            // 監聽認證狀態
+            onAuthStateChanged(auth, (user) => {
+                currentUser = user;
+                if (user) {
+                    // 認證成功後才開始監聽 Firestore
+                    setupListListener();
+                }
+            });
+
+        } catch (err) {
+            console.error("Firebase Init Error:", err);
+            listContainer.innerHTML = '<p class="text-red-400 text-xs">系統配置錯誤</p>';
+        }
+
+        function setupListListener() {
+            const participantsCol = collection(db, 'artifacts', appId, 'public', 'data', 'participants');
+            onSnapshot(participantsCol, (snapshot) => {
+                const names = [];
+                snapshot.forEach(doc => {
+                    if (doc.data().name) names.push(doc.data().name);
                 });
-            } else {
-                initAuth();
-            }
-        });
+                existingNames = names;
+                names.sort();
+                updateUI(names);
+            }, (error) => {
+                console.error("Firestore Listener Error:", error);
+                listContainer.innerHTML = '<p class="text-red-400 text-xs">載入名單失敗</p>';
+            });
+        }
 
         function updateUI(names) {
             if (names.length === 0) {
@@ -213,7 +228,7 @@
 
             countBadge.innerText = `${names.length} 人`;
             listContainer.innerHTML = names.map(name => `
-                <span class="bg-blue-500/10 border border-blue-500/30 text-blue-300 text-sm px-3 py-1 rounded-lg animate-in fade-in zoom-in duration-300">
+                <span class="bg-blue-500/10 border border-blue-500/30 text-blue-300 text-sm px-3 py-1 rounded-lg">
                     ${name}
                 </span>
             `).join('');
@@ -222,24 +237,21 @@
         async function handleJoin() {
             const name = nameInput.value.trim();
             
-            // 基礎檢查
             if (!name) {
                 showError("請輸入姓名後再點擊參加");
                 return;
             }
 
             if (!currentUser) {
-                showError("正在連線伺服器，請稍候...");
+                showError("正在登入系統，請稍候再試...");
                 return;
             }
 
-            // 檢查重複
             if (existingNames.includes(name)) {
                 showError("此姓名已在名單中囉！");
                 return;
             }
 
-            // 開始處理
             errorMsg.classList.add('hidden');
             joinBtn.disabled = true;
             const originalContent = joinBtn.innerHTML;
@@ -256,8 +268,8 @@
                 nameInput.value = '';
                 showToast(`✅ ${name} 報名成功！期待見到您。`);
             } catch (e) {
-                console.error("Save Error: ", e);
-                showError("儲存失敗，請再試一次");
+                console.error("Save Error:", e);
+                showError("傳送失敗，請稍後再試。");
             } finally {
                 joinBtn.disabled = false;
                 joinBtn.innerHTML = originalContent;
@@ -267,7 +279,12 @@
         function showError(msg) {
             errorMsg.innerText = msg;
             errorMsg.classList.remove('hidden');
-            setTimeout(() => errorMsg.classList.add('hidden'), 3000);
+            // 如果是嚴重錯誤，則不自動消失，讓使用者知道問題
+            if (!msg.includes("請輸入")) {
+                setTimeout(() => {}, 0); 
+            } else {
+                setTimeout(() => errorMsg.classList.add('hidden'), 3000);
+            }
         }
 
         function showToast(msg) {
