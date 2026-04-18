@@ -43,7 +43,6 @@
             box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
             outline: none;
         }
-        /* 載入中動畫 */
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
@@ -131,7 +130,7 @@
                         <span id="participant-count" class="text-blue-400 text-xs font-bold bg-blue-400/10 px-2 py-0.5 rounded-full">0 人</span>
                     </div>
                     <div id="participant-list" class="flex flex-wrap gap-2 max-h-32 overflow-y-auto pr-2 custom-scrollbar">
-                        <p class="text-slate-600 text-xs italic">正在載入名單...</p>
+                        <p class="text-slate-600 text-xs italic">正在連接伺服器...</p>
                     </div>
                 </div>
 
@@ -153,6 +152,7 @@
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // UI 元素引用
         const nameInput = document.getElementById('user-name');
         const joinBtn = document.getElementById('join-btn');
         const listContainer = document.getElementById('participant-list');
@@ -165,63 +165,69 @@
         let currentUser = null;
         let existingNames = [];
 
-        // 初始化 Firebase (加入錯誤捕捉)
-        try {
-            const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-            const app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
-            db = getFirestore(app);
-            appId = typeof __app_id !== 'undefined' ? __app_id : 'audio-workshop';
-            
-            // 立即執行認證程序 (Rule 3)
-            const initAuth = async () => {
-                try {
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await signInWithCustomToken(auth, __initial_auth_token);
-                    } else {
-                        await signInAnonymously(auth);
+        // 核心初始化函式
+        async function startApp() {
+            try {
+                // 從環境變數讀取配置 (Mandatory Patterns)
+                const firebaseConfig = JSON.parse(__firebase_config);
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+                appId = typeof __app_id !== 'undefined' ? __app_id : 'audio-workshop-default';
+
+                // 規則 3: 先執行認證
+                await initAuth();
+
+                // 監聽認證狀態變更
+                onAuthStateChanged(auth, (user) => {
+                    currentUser = user;
+                    if (user) {
+                        setupListListener();
                     }
-                } catch (err) {
-                    console.error("Authentication failed:", err);
-                    showError("連線認證失敗，請檢查網路。");
+                });
+
+            } catch (err) {
+                console.error("Initialization Error:", err);
+                listContainer.innerHTML = '<p class="text-amber-400 text-xs">等待雲端配置中...</p>';
+            }
+        }
+
+        async function initAuth() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
                 }
-            };
-
-            initAuth();
-
-            // 監聽認證狀態
-            onAuthStateChanged(auth, (user) => {
-                currentUser = user;
-                if (user) {
-                    // 認證成功後才開始監聽 Firestore
-                    setupListListener();
-                }
-            });
-
-        } catch (err) {
-            console.error("Firebase Init Error:", err);
-            listContainer.innerHTML = '<p class="text-red-400 text-xs">系統配置錯誤</p>';
+            } catch (err) {
+                console.error("Auth Error:", err);
+            }
         }
 
         function setupListListener() {
+            // 規則 1: 嚴格路徑結構
             const participantsCol = collection(db, 'artifacts', appId, 'public', 'data', 'participants');
+            
+            // 規則 2: 不使用複雜查詢
             onSnapshot(participantsCol, (snapshot) => {
                 const names = [];
                 snapshot.forEach(doc => {
                     if (doc.data().name) names.push(doc.data().name);
                 });
+                
                 existingNames = names;
+                // 在記憶體中進行排序
                 names.sort();
                 updateUI(names);
             }, (error) => {
-                console.error("Firestore Listener Error:", error);
-                listContainer.innerHTML = '<p class="text-red-400 text-xs">載入名單失敗</p>';
+                console.error("Snapshot Error:", error);
+                listContainer.innerHTML = '<p class="text-red-400 text-xs">暫時無法讀取名單</p>';
             });
         }
 
         function updateUI(names) {
             if (names.length === 0) {
-                listContainer.innerHTML = '<p class="text-slate-600 text-xs italic">尚未有人簽到</p>';
+                listContainer.innerHTML = '<p class="text-slate-600 text-xs italic">目前尚無人簽到</p>';
                 countBadge.innerText = '0 人';
                 return;
             }
@@ -243,7 +249,7 @@
             }
 
             if (!currentUser) {
-                showError("正在登入系統，請稍候再試...");
+                showError("系統連線中，請稍候...");
                 return;
             }
 
@@ -266,10 +272,10 @@
                 });
 
                 nameInput.value = '';
-                showToast(`✅ ${name} 報名成功！期待見到您。`);
+                showToast(`✅ ${name} 簽到成功！`);
             } catch (e) {
-                console.error("Save Error:", e);
-                showError("傳送失敗，請稍後再試。");
+                console.error("Add Doc Error:", e);
+                showError("傳送失敗，請再試一次");
             } finally {
                 joinBtn.disabled = false;
                 joinBtn.innerHTML = originalContent;
@@ -279,12 +285,7 @@
         function showError(msg) {
             errorMsg.innerText = msg;
             errorMsg.classList.remove('hidden');
-            // 如果是嚴重錯誤，則不自動消失，讓使用者知道問題
-            if (!msg.includes("請輸入")) {
-                setTimeout(() => {}, 0); 
-            } else {
-                setTimeout(() => errorMsg.classList.add('hidden'), 3000);
-            }
+            setTimeout(() => errorMsg.classList.add('hidden'), 3000);
         }
 
         function showToast(msg) {
@@ -297,6 +298,10 @@
             }, 3000);
         }
 
+        // 啟動應用
+        startApp();
+
+        // 事件監聽
         joinBtn.addEventListener('click', handleJoin);
         nameInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') handleJoin();
