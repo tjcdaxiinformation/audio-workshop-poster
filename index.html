@@ -39,6 +39,14 @@
         const App = () => {
             const [mainCategory, setMainCategory] = useState('lecture');
             const [activeTab, setActiveTab] = useState('outline');
+            
+            // 窒礙問題反應的即時狀態
+            const [reports, setReports] = useState([
+                { id: 1, date: "2026-04-18", category: "音響設備", content: "無線麥克風 CH5 在領唱時偶有斷訊音", reporter: "王同工", status: "已記錄" },
+                { id: 2, date: "2026-04-18", category: "直播問題", content: "OBS 串流位元率波動較大，建議檢查網路線", reporter: "陳負責人", status: "處理中" }
+            ]);
+
+            const [formData, setFormData] = useState({ category: "音響設備", content: "", reporter: "" });
 
             const channelMap = [
                 { ch: 1, name: "電腦音 / 主領翻譯", type: "Input", color: "bg-blue-100" },
@@ -53,6 +61,23 @@
                 { ch: "ST IN", name: "講台音源", type: "Input", color: "bg-orange-100" },
                 { ch: "Stereo", name: "總音量", type: "Master", color: "bg-red-200" }
             ];
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (!formData.content || !formData.reporter) return;
+                
+                const newReport = {
+                    id: Date.now(),
+                    date: new Date().toISOString().split('T')[0],
+                    category: formData.category,
+                    content: formData.content,
+                    reporter: formData.reporter,
+                    status: "新提交"
+                };
+                
+                setReports([newReport, ...reports]);
+                setFormData({ ...formData, content: "", reporter: "" });
+            };
 
             return (
                 <div className="min-h-screen p-2 md:p-6 lg:p-8">
@@ -72,10 +97,11 @@
                                     </div>
                                 </div>
                             </div>
-                            <div className="flex bg-slate-800 p-1.5 rounded-2xl mt-4 md:mt-0 gap-1 shadow-inner">
-                                <button onClick={() => {setMainCategory('lecture'); setActiveTab('outline');}} className={`px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all ${mainCategory === 'lecture' ? 'bg-amber-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}><Icon name="book-open" size={16}/> 專題講義</button>
-                                <button onClick={() => {setMainCategory('obs'); setActiveTab('interface');}} className={`px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all ${mainCategory === 'obs' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}><Icon name="video" size={16}/> OBS 29.1.3</button>
-                                <button onClick={() => {setMainCategory('tf1'); setActiveTab('layout');}} className={`px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all ${mainCategory === 'tf1' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}><Icon name="settings" size={16}/> YAMAHA TF1</button>
+                            <div className="flex bg-slate-800 p-1.5 rounded-2xl mt-4 md:mt-0 gap-1 shadow-inner flex-wrap justify-center">
+                                <button onClick={() => {setMainCategory('lecture'); setActiveTab('outline');}} className={`px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all ${mainCategory === 'lecture' ? 'bg-amber-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}><Icon name="book-open" size={16}/> 專題講義</button>
+                                <button onClick={() => {setMainCategory('obs'); setActiveTab('interface');}} className={`px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all ${mainCategory === 'obs' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}><Icon name="video" size={16}/> OBS</button>
+                                <button onClick={() => {setMainCategory('tf1'); setActiveTab('layout');}} className={`px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all ${mainCategory === 'tf1' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}><Icon name="settings" size={16}/> TF1</button>
+                                <button onClick={() => {setMainCategory('reports'); setActiveTab('form');}} className={`px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all ${mainCategory === 'reports' ? 'bg-rose-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}><Icon name="alert-circle" size={16}/> 窒礙反應</button>
                             </div>
                         </div>
 
@@ -101,29 +127,34 @@
                                     <button onClick={() => setActiveTab('audio_obs')} className={`px-8 py-4 text-sm font-bold whitespace-nowrap transition-all ${activeTab === 'audio_obs' ? 'border-b-4 border-blue-600 text-blue-600 bg-blue-50/30' : 'text-slate-500 hover:bg-slate-50'}`}>音訊監控</button>
                                 </>
                             )}
+                            {mainCategory === 'reports' && (
+                                <>
+                                    <button onClick={() => setActiveTab('form')} className={`px-8 py-4 text-sm font-bold whitespace-nowrap transition-all ${activeTab === 'form' ? 'border-b-4 border-rose-600 text-rose-600 bg-rose-50/30' : 'text-slate-500 hover:bg-slate-50'}`}>問題提交與紀錄</button>
+                                </>
+                            )}
                         </div>
 
                         {/* 內容區塊 */}
-                        <div className="p-6 md:p-10 min-h-[600px] animate-fade-in">
+                        <div className="p-6 md:p-10 min-h-[600px] animate-fade-in text-slate-800">
                             {mainCategory === 'lecture' && activeTab === 'outline' && (
                                 <div className="space-y-8">
                                     <div className="bg-gradient-to-r from-amber-500 to-orange-600 p-8 rounded-[2rem] text-white shadow-xl shadow-amber-500/20">
-                                        <h2 className="text-3xl font-black mb-2">專題：沒有聽見，怎能相信？</h2>
+                                        <h2 className="text-3xl font-black mb-2 text-white">專題：沒有聽見，怎能相信？</h2>
                                         <p className="opacity-90 font-medium tracking-wide">4/18 音控講習會 | 40 分鐘培訓講義</p>
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                         <div className="bg-slate-50 p-8 rounded-3xl border border-slate-200">
                                             <h3 className="font-black text-xl mb-6 flex items-center gap-3 text-slate-800"><Icon name="clock" className="text-amber-600" /> 課程分配</h3>
                                             <div className="space-y-6 text-slate-700">
-                                                <div className="border-l-4 border-amber-200 pl-4">
+                                                <div className="border-l-4 border-amber-200 pl-4 text-slate-800">
                                                     <p className="font-bold">00-05m: 守門人角色</p>
                                                     <p className="text-sm opacity-70 italic">音控桌即是祭壇，確保真理無礙傳遞。</p>
                                                 </div>
-                                                <div className="border-l-4 border-amber-200 pl-4">
+                                                <div className="border-l-4 border-amber-200 pl-4 text-slate-800">
                                                     <p className="font-bold">05-20m: TF1 技術實務</p>
                                                     <p className="text-sm opacity-70 italic">GainFinder 與 1-Knob EQ 的實戰平衡。</p>
                                                 </div>
-                                                <div className="border-l-4 border-amber-200 pl-4">
+                                                <div className="border-l-4 border-amber-200 pl-4 text-slate-800">
                                                     <p className="font-bold">20-35m: OBS 傳播實務</p>
                                                     <p className="text-sm opacity-70 italic">音畫同步與投影片(PPT)投放的精準度。</p>
                                                 </div>
@@ -132,8 +163,99 @@
                                         <div className="bg-indigo-600 p-8 rounded-3xl text-white shadow-xl shadow-indigo-600/20 flex flex-col justify-center">
                                             <Icon name="heart" size={48} className="mb-4 opacity-50" />
                                             <p className="text-xl font-medium leading-relaxed italic mb-4">「人未曾聽見祂，怎能信祂呢？沒有傳道的，怎能聽見呢？」</p>
-                                            <p className="text-sm opacity-80">— 羅馬書 10:14</p>
+                                            <p className="text-sm opacity-80 text-white">— 羅馬書 10:14</p>
                                             <p className="mt-6 font-bold text-amber-300">每一分聲音的清晰度，都是為了讓福音飛翔。</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {mainCategory === 'reports' && activeTab === 'form' && (
+                                <div className="space-y-8">
+                                    <div className="bg-rose-50 border-l-8 border-rose-500 p-8 rounded-r-[2rem] text-rose-950">
+                                        <h3 className="text-2xl font-black mb-2 flex items-center gap-2"><Icon name="message-square" /> 窒礙問題即時反應</h3>
+                                        <p className="font-medium text-slate-800">若在聚會中遇到任何設備故障或技術阻礙，請在此詳實記錄，以便後續排除。</p>
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                                        {/* 反應表單 */}
+                                        <div className="lg:col-span-1 bg-white border-2 border-slate-100 p-8 rounded-3xl shadow-sm">
+                                            <h4 className="font-black text-lg mb-6 text-slate-800">填寫反應表</h4>
+                                            <form onSubmit={handleSubmit} className="space-y-5">
+                                                <div>
+                                                    <label className="block text-sm font-bold mb-2">問題類別</label>
+                                                    <select 
+                                                        value={formData.category}
+                                                        onChange={(e) => setFormData({...formData, category: e.target.value})}
+                                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-rose-500 outline-none transition-all"
+                                                    >
+                                                        <option>音響設備</option>
+                                                        <option>直播系統</option>
+                                                        <option>PPT/投影</option>
+                                                        <option>電力/網路</option>
+                                                        <option>其他</option>
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label className="block text-sm font-bold mb-2">問題具體描述</label>
+                                                    <textarea 
+                                                        rows="4"
+                                                        value={formData.content}
+                                                        onChange={(e) => setFormData({...formData, content: e.target.value})}
+                                                        placeholder="請詳細描述問題發生的時間與現象..."
+                                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-rose-500 outline-none transition-all resize-none"
+                                                    ></textarea>
+                                                </div>
+                                                <div>
+                                                    <label className="block text-sm font-bold mb-2">反應同工</label>
+                                                    <input 
+                                                        type="text"
+                                                        value={formData.reporter}
+                                                        onChange={(e) => setFormData({...formData, reporter: e.target.value})}
+                                                        placeholder="請輸入您的姓名"
+                                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-rose-500 outline-none transition-all"
+                                                    />
+                                                </div>
+                                                <button type="submit" className="w-full bg-rose-600 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-rose-700 flex items-center justify-center gap-2 transition-all transform active:scale-95">
+                                                    <Icon name="send" size={18} /> 提交反應
+                                                </button>
+                                            </form>
+                                        </div>
+
+                                        {/* 即時紀錄清單 */}
+                                        <div className="lg:col-span-2 space-y-4">
+                                            <h4 className="font-black text-lg text-slate-800 flex items-center justify-between">
+                                                <span>歷史紀錄 (最新顯示)</span>
+                                                <span className="text-xs bg-slate-100 px-3 py-1 rounded-full text-slate-500">{reports.length} 則紀錄</span>
+                                            </h4>
+                                            <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2 scrollbar-hide">
+                                                {reports.length > 0 ? reports.map(report => (
+                                                    <div key={report.id} className="bg-white border border-slate-100 p-5 rounded-2xl shadow-sm hover:shadow-md transition-all animate-fade-in">
+                                                        <div className="flex justify-between items-start mb-3">
+                                                            <div className="flex gap-2">
+                                                                <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                                                                    report.category === '音響設備' ? 'bg-indigo-100 text-indigo-700' :
+                                                                    report.category === '直播系統' ? 'bg-blue-100 text-blue-700' :
+                                                                    report.category === 'PPT/投影' ? 'bg-orange-100 text-orange-700' :
+                                                                    'bg-slate-100 text-slate-700'
+                                                                }`}>
+                                                                    {report.category}
+                                                                </span>
+                                                                <span className="text-[10px] text-slate-400 flex items-center gap-1"><Icon name="calendar" size={10} /> {report.date}</span>
+                                                            </div>
+                                                            <span className="text-[10px] font-bold text-rose-500 bg-rose-50 px-2 py-0.5 rounded border border-rose-100">{report.status}</span>
+                                                        </div>
+                                                        <p className="text-sm font-medium mb-3 leading-relaxed text-slate-700">{report.content}</p>
+                                                        <div className="flex justify-between items-center text-[11px] text-slate-400 border-t pt-3 border-slate-50">
+                                                            <span>回報人：<b className="text-slate-600 font-black">{report.reporter}</b></span>
+                                                        </div>
+                                                    </div>
+                                                )) : (
+                                                    <div className="text-center py-20 text-slate-300 italic border-2 border-dashed rounded-3xl">
+                                                        目前暫無反應紀錄
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -142,29 +264,29 @@
                             {mainCategory === 'lecture' && activeTab === 'ppt_rules' && (
                                 <div className="space-y-8">
                                     <div className="bg-orange-50 border-l-8 border-orange-500 p-8 rounded-r-[2rem] text-orange-950">
-                                        <h3 className="text-2xl font-black mb-2 flex items-center gap-2"><Icon name="presentation" /> 投影片 (PPT) 投放規範</h3>
-                                        <p className="font-medium">視覺訊息是會眾領受真理的第一道門戶，務必精準。</p>
+                                        <h3 className="text-2xl font-black mb-2 flex items-center gap-2 text-orange-800"><Icon name="presentation" /> 投影片 (PPT) 投放規範</h3>
+                                        <p className="font-medium text-slate-800">視覺訊息是會眾領受真理的第一道門戶，務必精準。</p>
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                         <div className="bg-white border-2 border-slate-100 p-8 rounded-3xl space-y-6">
                                             <div className="flex gap-4">
                                                 <Icon name="check-circle" className="text-emerald-500 shrink-0" />
-                                                <div>
+                                                <div className="text-slate-800">
                                                     <p className="font-black text-slate-800">0.5 秒同步準則</p>
                                                     <p className="text-sm text-slate-500 mt-1 leading-relaxed">歌詞應在歌手開口前 0.5 秒出現。視線緊跟領會節奏，不遲誤。</p>
                                                 </div>
                                             </div>
                                             <div className="flex gap-4 border-t pt-6">
                                                 <Icon name="check-circle" className="text-emerald-500 shrink-0" />
-                                                <div>
+                                                <div className="text-slate-800">
                                                     <p className="font-black text-slate-800">內容三次檢查</p>
                                                     <p className="text-sm text-slate-500 mt-1 leading-relaxed">聚會前確認：錯字、字體大小、影片聲音、頁面比例(16:9)。</p>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="bg-slate-900 p-8 rounded-3xl text-white space-y-4">
+                                        <div className="bg-slate-900 p-8 rounded-3xl text-white space-y-4 shadow-xl">
                                             <h4 className="font-bold text-orange-400">OBS 技術建議</h4>
-                                            <ul className="text-sm space-y-3 opacity-90">
+                                            <ul className="text-sm space-y-3 opacity-90 text-white">
                                                 <li className="flex gap-2">• 使用「視窗擷取」PPT，避免滑鼠在直播中移動。</li>
                                                 <li className="flex gap-2">• 設定「雙螢幕模式」，主控可同時看備忘錄。</li>
                                                 <li className="flex gap-2">• 若 PPT 當機，立即切換 OBS 至「全景」場景。</li>
@@ -175,7 +297,7 @@
                             )}
 
                             {mainCategory === 'tf1' && activeTab === 'channels' && (
-                                <div className="overflow-hidden border border-slate-200 rounded-3xl shadow-sm">
+                                <div className="overflow-hidden border border-slate-200 rounded-3xl shadow-sm bg-white">
                                     <table className="w-full text-left">
                                         <thead className="bg-slate-800 text-white">
                                             <tr>
@@ -202,10 +324,10 @@
                             )}
 
                             {mainCategory === 'obs' && activeTab === 'audio_obs' && (
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                    <div className="bg-slate-50 p-8 rounded-3xl border border-slate-200">
-                                        <h4 className="font-black text-slate-800 mb-8 flex items-center gap-2"><Icon name="volume-2" className="text-blue-600"/> OBS 混音器監控</h4>
-                                        <div className="space-y-10">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-slate-800">
+                                    <div className="bg-slate-50 p-8 rounded-3xl border border-slate-200 text-slate-800">
+                                        <h4 className="font-black mb-8 flex items-center gap-2"><Icon name="volume-2" className="text-blue-600"/> OBS 混音器監控</h4>
+                                        <div className="space-y-10 text-slate-800">
                                             <div>
                                                 <div className="flex justify-between mb-2">
                                                     <span className="text-sm font-black">麥克風/輸入音效 (TF1 CH13)</span>
@@ -224,19 +346,19 @@
                                     </div>
                                     <div className="bg-gradient-to-br from-blue-700 to-indigo-900 text-white rounded-[2rem] p-10 flex flex-col justify-center shadow-2xl relative overflow-hidden">
                                         <div className="absolute -top-10 -right-10 opacity-10"><Icon name="volume-2" size={200} /></div>
-                                        <h4 className="text-2xl font-black mb-8 relative z-10">直播監聽黃金準則</h4>
-                                        <ul className="space-y-6 text-sm font-medium relative z-10">
+                                        <h4 className="text-2xl font-black mb-8 relative z-10 text-white">直播監聽黃金準則</h4>
+                                        <ul className="space-y-6 text-sm font-medium relative z-10 text-white">
                                             <li className="flex gap-4 items-start">
                                                 <div className="w-6 h-6 rounded-full bg-emerald-400 shrink-0 border-2 border-white/30 shadow-lg"></div>
-                                                <span className="opacity-90 leading-relaxed">指標維持在「綠色」：語音與環境音的最穩定安全區。</span>
+                                                <span className="opacity-90 leading-relaxed text-white">指標維持在「綠色」：語音與環境音的最穩定安全區。</span>
                                             </li>
                                             <li className="flex gap-4 items-start">
                                                 <div className="w-6 h-6 rounded-full bg-yellow-400 shrink-0 border-2 border-white/30 shadow-lg"></div>
-                                                <span className="opacity-90 leading-relaxed">尖峰跳動在「黃色」：最理想直播音量，聽感飽滿清晰。</span>
+                                                <span className="opacity-90 leading-relaxed text-white">尖峰跳動在「黃色」：最理想直播音量，聽感飽滿清晰。</span>
                                             </li>
                                             <li className="flex gap-4 items-start">
                                                 <div className="w-6 h-6 rounded-full bg-red-600 shrink-0 border-2 border-white/30 shadow-lg"></div>
-                                                <span className="font-black text-amber-300 leading-relaxed">
+                                                <span className="font-black text-amber-300 leading-relaxed text-yellow-300">
                                                     嚴禁進入「紅色」：會造成數位失真(破音)，請立即處理。
                                                 </span>
                                             </li>
@@ -245,7 +367,23 @@
                                 </div>
                             )}
 
-                            {/* 剩餘分頁如面板佈局、SOP等內容皆已包含在內 */}
+                            {/* 其他如面板佈局、SOP等內容由對應 Category 切換 */}
+                            {mainCategory === 'tf1' && activeTab === 'layout' && (
+                                <div className="animate-fade-in bg-slate-50 p-10 rounded-3xl border border-dashed border-indigo-200 text-center text-slate-400">
+                                    <Icon name="layout" size={48} className="mx-auto mb-4 opacity-20" />
+                                    <p>YAMAHA TF1 面板配置詳情，請參閱實體手冊對應頁面。</p>
+                                </div>
+                            )}
+                            {mainCategory === 'tf1' && activeTab === 'sop' && (
+                                <div className="animate-fade-in bg-slate-50 p-10 rounded-3xl border border-dashed border-indigo-200 text-center text-slate-400 text-slate-800">
+                                    <h4 className="font-black mb-4">標準開機流程：先訊號後動力</h4>
+                                    <ol className="text-left max-w-md mx-auto space-y-2 text-sm text-slate-600">
+                                        <li>1. 開啟無線麥克風接收器。</li>
+                                        <li>2. 開啟 TF1 混音機電源 (待系統啟動)。</li>
+                                        <li>3. 開啟後櫃「開閉」喇叭開關。</li>
+                                    </ol>
+                                </div>
+                            )}
                         </div>
 
                         {/* 頁尾 */}
